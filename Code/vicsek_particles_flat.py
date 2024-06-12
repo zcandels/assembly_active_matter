@@ -45,6 +45,29 @@ class Particle():
     def set_topBottom_collision_flag(self, n):
         self.recent_top_bottom_collision = n
         return None
+    
+    def PBC(self, n, L_x, L_y):
+        p_x = self.position[n][0]
+        p_y = self.position[n][1]
+        
+        if np.linalg.norm([p_x, p_y], np.inf) > L_x/2:
+            print("out of bounds prior to application of BCs \n")
+            print("p_x = ", p_x, " p_y = ", p_y)
+        
+        if (p_x < -L_x * 0.5):
+            p_x = p_x + L_x
+        if (p_x >= L_x * 0.5):
+            p_x = p_x - L_x
+        if (p_y < - L_y * 0.5):
+            p_y = p_y + L_y
+        if (p_y >= L_y * 0.5):
+            p_y = p_y - L_y
+        
+        new_position = np.array([p_x, p_y])
+        if np.linalg.norm([p_x, p_y], np.inf) > L_x/2:
+            print("Still out of bounds \n")
+            print("p_x = ", p_x, " p_y = ", p_y)
+        self.position[n] = new_position
 
     def get_current_position(self, n):
         return self.position[n]
@@ -146,6 +169,8 @@ for n in range(Nt-1):
         p_vel = p.get_current_velocity(n)
         d_pos = p_vel*dt
         p.set_position(p_pos + d_pos)
+
+        p.PBC(n, L_x, L_y)
 
     #print(sum_vels)
     #[g_r, radii] = rdf(coords, dr = 0.01, parallel=False)#, progress=True)
