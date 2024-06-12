@@ -17,12 +17,14 @@ $$ \mathbf{x}_i^{(n+1)} = \mathbf{x}_i^{(n)} + \mathbf{v}_i^{(n)}\delta t $$
 
 where 
 
-$\mathbf{v}_i^{(n)} = v\cdot \begin{pmatrix} \cos \theta^{(n)} \\ \sin \theta^{(n)}
-\end{pmatrix} $. Here, $v$ is a constant velocity and the direction of motion
+$
+\mathbf{v}_i^{(n)} = v\cdot \begin{pmatrix} \cos \theta^{(n)} \\ \sin \theta^{(n)}
+\end{pmatrix}
+$. Here, $v$ is a constant velocity and the direction of motion
 is determined in each timestep by
 
 $$ \theta^{(n+1)} = \langle \theta^{(n)} \rangle_r + \Delta \theta $$
 
-where $\lanble \theta^{(n)} \rangle$ is the average direction of the particles
+where $\langle\theta^{(n)} \rangle_r$ is the average direction of the particles
 within a distance $r$ of particle $i$ and $\Delta theta$ represents 
 delta-correlated Gaussian noise.
