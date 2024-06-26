@@ -63,7 +63,7 @@ def visualize_results(clusters):
         cluster = clusters[n]
         x = cluster['x-position']
         y = cluster['y-position']
-        theta = cluster['orientations']
+        theta = cluster['angle']
         u = np.cos(theta)
         v = np.sin(theta)
         plt.quiver(x,y,u,v,color=colors[n])
@@ -133,8 +133,8 @@ def main():
     for n in range(steps):
             sim_vicsek.update()
             pos = sim_vicsek.get_positions()
-            orientations = sim_vicsek.get_velocities()
-            kinematic_df = clus.make_kinematic_df(pos, orientations)
+            angles = sim_vicsek.get_velocities()
+            kinematic_df = clus.make_kinematic_df(pos, angles)
             
             clusters = clus.make_clusters(kinematic_df)
             
