@@ -17,9 +17,8 @@ $$ \mathbf{x}_i^{(n+1)} = \mathbf{x}_i^{(n)} + \mathbf{v}_i^{(n)}\delta t $$
 
 where 
 
-$
-\mathbf{v}_i^{(n)} = v\cdot \begin{pmatrix} \cos \theta^{(n)} \\ \sin \theta^{(n)}
-\end{pmatrix}$. Here, $v$ is a constant velocity and the direction of motion
+$\mathbf{v}_i^{(n)} = v\cdot \begin{bmatrix} \cos \theta^{(n)} \\ \sin \theta^{(n)}
+\end{bmatrix}$. Here, $v$ is a constant velocity and the direction of motion
 is determined in each timestep by
 
 $$ \theta^{(n+1)} = \langle \theta^{(n)} \rangle_r + \Delta \theta $$
