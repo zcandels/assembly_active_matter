@@ -26,3 +26,7 @@ $$ \theta^{(n+1)} = \langle \theta^{(n)} \rangle_r + \Delta \theta $$
 where $\langle\theta^{(n)} \rangle_r$ is the average direction of the particles
 within a distance $r$ of particle $i$ and $\Delta \theta$ represents 
 delta-correlated Gaussian noise.
+
+$\begin{bmatrix} u\\e \end{bmatrix}  \sim 
+N (\begin{bmatrix}0\\0\end{bmatrix},
+\begin{bmatrix} G(\sigma_g) &0\\ 0 &R(\sigma_{\gamma})\end{bmatrix})$
