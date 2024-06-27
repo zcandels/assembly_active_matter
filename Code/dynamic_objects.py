@@ -100,8 +100,9 @@ def generate_mol_file(clusters):
             = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
         atom_list = [ (j,"C") for j,i in enumerate(vertices)]
         mol= tables2mol((atom_list,bonds_info))
-        fileName = f"assembly_index_cluster_{iter}"
+        fileName = f"mol_file_cluster_{iter}"
         print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
+	return
 
 
 def main():
