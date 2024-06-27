@@ -32,7 +32,11 @@ def get_edges_vertices(cluster):
     return edges, vertices
 
 
+<<<<<<< HEAD
 def visualize_results(clusters):
+=======
+def visualize_results(clusters, step):
+>>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
     
     import matplotlib.cm as cm
     N_clus = len(clusters)
@@ -40,6 +44,7 @@ def visualize_results(clusters):
     stop = 1.0
     cm_subsection = np.linspace(start, stop, N_clus)
     colors = [ cm.jet(x) for x in cm_subsection ]
+    
     
     plt.rcParams['text.usetex'] = True
     plt.figure()
@@ -54,6 +59,9 @@ def visualize_results(clusters):
         plt.xlabel(r'$x$', fontsize=20)
         plt.ylabel(r'$y$', fontsize=20)
     plt.show()
+    
+    figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
+    plt.savefig(figPath + f"step{step}.pdf", bbox_inches='tight')
     
     return
     
@@ -100,7 +108,11 @@ def generate_mol_file(clusters):
             = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
         atom_list = [ (j,"C") for j,i in enumerate(vertices)]
         mol= tables2mol((atom_list,bonds_info))
+<<<<<<< HEAD
         fileName = f"mol_file_cluster_{iter}"
+=======
+        fileName = f"assembly_index_cluster_{iter}"
+>>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
         print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
 
 
@@ -125,12 +137,20 @@ def main():
             
             clusters = clus.make_clusters(kinematic_df)
             
+<<<<<<< HEAD
             
             #vertices, edges = get_edges_vertices(clusters)
             
             generate_mol_file(clusters)
             
             visualize_results(clusters)
+=======
+            #vertices, edges = get_edges_vertices(clusters)
+            
+            generate_mol_file(clusters)
+            
+            visualize_results(clusters, n)
+>>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
             
 
 if __name__ == '__main__':
