@@ -4,11 +4,11 @@ import clustering_fns as clus
 import vic as vm
 
 
-def get_edges_vertices(clusters):
+def get_edges_vertices(cluster):
     
-    cluster1_positions = clusters[0]
+    cluster_positions = cluster[ ['x-position', 'y-position'] ]
     from sklearn.neighbors import kneighbors_graph
-    graph1 = kneighbors_graph(cluster1_positions, 2, mode='connectivity',
+    graph1 = kneighbors_graph(cluster_positions, 2, mode='connectivity',
                               include_self=True)
     
     
@@ -29,24 +29,8 @@ def get_edges_vertices(clusters):
             edges.append(Edges[i])
             
     
-    return vertices, edges
+    return edges, vertices
 
-def plot_results(cluster1_positions, cluster2_positions):
-    
-    # plt.figure()
-    # obj1 = plt.scatter(cluster1_positions['x-position'],
-    #             cluster1_positions['y-position'], c='red')
-    # obj2 = plt.scatter(cluster2_positions['x-position'],
-    #             cluster2_positions['y-position'], c='blue')
-    
-    # plt.legend((obj1, obj2),('cluster 1', 'cluster 2'), fontsize=8)
-    # plt.xlabel(r'$x$', fontsize=15)
-    # plt.ylabel(r'$y$', fontsize=15)
-
-    # plt.show()
-    
-    
-    return
 
 def visualize_results(clusters):
     
@@ -75,7 +59,7 @@ def visualize_results(clusters):
     
 
 
-def generate_mol_file(edges, vertices):
+def generate_mol_file(clusters):
     
     
     from rdkit import Chem
@@ -110,11 +94,14 @@ def generate_mol_file(edges, vertices):
         mol = emol.GetMol()
         return mol
     
-    bonds_info \
-        = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
-    atom_list = [ (j,"C") for j,i in enumerate(vertices)]
-    mol= tables2mol((atom_list,bonds_info))
-    print(Chem.MolToMolBlock(mol),file=open('example.mol','w+'))
+    for iter in range(len(clusters)):
+        edges, vertices = get_edges_vertices(clusters[iter])
+        bonds_info \
+            = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
+        atom_list = [ (j,"C") for j,i in enumerate(vertices)]
+        mol= tables2mol((atom_list,bonds_info))
+        fileName = f"assembly_index_cluster_{iter}"
+        print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
 
 
 def main():
@@ -138,12 +125,10 @@ def main():
             
             clusters = clus.make_clusters(kinematic_df)
             
-            #plot_results(cluster1, cluster2)
             
-            vertices, edges = get_edges_vertices(clusters)
+            #vertices, edges = get_edges_vertices(clusters)
             
-            generate_mol_file(edges, vertices)
-            print(edges)
+            generate_mol_file(clusters)
             
             visualize_results(clusters)
             
