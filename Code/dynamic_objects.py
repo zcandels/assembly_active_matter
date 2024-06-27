@@ -102,7 +102,6 @@ def generate_mol_file(clusters):
         mol= tables2mol((atom_list,bonds_info))
         fileName = f"mol_file_cluster_{iter}"
         print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
-	return
 
 
 def main():
