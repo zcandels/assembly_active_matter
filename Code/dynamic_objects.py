@@ -32,11 +32,7 @@ def get_edges_vertices(cluster):
     return edges, vertices
 
 
-<<<<<<< HEAD
-def visualize_results(clusters):
-=======
 def visualize_results(clusters, step):
->>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
     
     import matplotlib.cm as cm
     N_clus = len(clusters)
@@ -108,49 +104,62 @@ def generate_mol_file(clusters):
             = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
         atom_list = [ (j,"C") for j,i in enumerate(vertices)]
         mol= tables2mol((atom_list,bonds_info))
-<<<<<<< HEAD
         fileName = f"mol_file_cluster_{iter}"
-=======
-        fileName = f"assembly_index_cluster_{iter}"
->>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
         print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
+
+def call_assembly_code(num_clusters):
+    import subprocess
+    import re
+    
+    assembly_indices_single_timestep = []
+    for n in range(num_clusters):
+        subprocess.run(["assemblyCpp_256.exe", f"mol_file_cluster_{n}"])
+        
+        fName = f"mol_file_cluster_{n}Out"
+        with open(fName, 'r') as file:
+            content = file.read()
+        numbers = re.findall(r'\d+', content)
+        
+        assembly_index = int(numbers[1])
+        assembly_indices_single_timestep.append(assembly_index)
+        print("assembly index = ", assembly_index)
+        
+    
+    return assembly_indices_single_timestep
+    
 
 
 def main():
     plt.close('all')
-    N = 40
-    L = 3.1
+    N = 300
+    L = 7
     v = 0.03
     r = 1
     dt = 1
     steps = 5
+    assembly_indices_all_time = []
 
-    eta = 0.1
+    eta = 1.0
     
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
 
     for n in range(steps):
+
             sim_vicsek.update()
             pos = sim_vicsek.get_positions()
             angles = sim_vicsek.get_velocities()
             kinematic_df = clus.make_kinematic_df(pos, angles)
             
             clusters = clus.make_clusters(kinematic_df)
-            
-<<<<<<< HEAD
-            
-            #vertices, edges = get_edges_vertices(clusters)
+            num_clusters = len(clusters)
             
             generate_mol_file(clusters)
+
+            assembly_indices_step_n = call_assembly_code(num_clusters)
             
-            visualize_results(clusters)
-=======
-            #vertices, edges = get_edges_vertices(clusters)
-            
-            generate_mol_file(clusters)
+            assembly_indices_all_time.append(assembly_indices_step_n)
             
             visualize_results(clusters, n)
->>>>>>> 1233267bdc461f1ef41e0b388829389286b57007
             
 
 if __name__ == '__main__':
