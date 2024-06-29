@@ -57,7 +57,7 @@ def visualize_results(clusters, step):
     plt.show()
     
     figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
-    plt.savefig(figPath + f"step{step}.pdf", bbox_inches='tight')
+    plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
     
     return
     
@@ -122,7 +122,7 @@ def call_assembly_code(num_clusters):
         
         assembly_index = int(numbers[1])
         assembly_indices_single_timestep.append(assembly_index)
-        print("assembly index = ", assembly_index)
+        print(assembly_index,",")
         
     
     return assembly_indices_single_timestep
@@ -139,7 +139,7 @@ def main():
     steps = 5
     assembly_indices_all_time = []
 
-    eta = 1.0
+    eta = 0.1
     
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
 
@@ -150,16 +150,26 @@ def main():
             angles = sim_vicsek.get_velocities()
             kinematic_df = clus.make_kinematic_df(pos, angles)
             
-            clusters = clus.make_clusters(kinematic_df)
+            clusters = clus.makeClustersDbscan(kinematic_df)
             num_clusters = len(clusters)
             
-            generate_mol_file(clusters)
-
-            assembly_indices_step_n = call_assembly_code(num_clusters)
-            
-            assembly_indices_all_time.append(assembly_indices_step_n)
-            
             visualize_results(clusters, n)
+            
+            # generate_mol_file(clusters)
+
+            # assembly_indices_step_n = call_assembly_code(num_clusters)
+            
+            # diff = np.max(assembly_indices_step_n)\
+            #     - np.min(assembly_indices_step_n)
+
+            # plt.figure()
+            # plt.hist(assembly_indices_step_n, diff, histtype='bar')
+            # plt.xlabel(r"Assembly Index $a$")
+            # plt.ylabel("Count")
+            
+            # assembly_indices_all_time.append(assembly_indices_step_n)
+            
+            
             
 
 if __name__ == '__main__':
