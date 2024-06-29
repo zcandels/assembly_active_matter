@@ -1,6 +1,7 @@
 
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
 from sklearn import preprocessing
 
@@ -37,7 +38,7 @@ def make_kinematic_df(pos, orientations):
     return dfCluster
 
 
-def make_clusters(dfCluster):
+def makeClustersKmeans(dfCluster):
     '''
     Creates clusters of data based on the K-means clustering algorithm
     implemented in sklearn.
@@ -85,3 +86,17 @@ def make_clusters(dfCluster):
         clusters.append(dfCluster[dfCluster.cluster==i])
     
     return clusters
+
+def makeClustersDbscan(dfCluster):
+    from numpy import unique 
+    clustering = DBSCAN(eps = 0.2, min_samples=2).fit(dfCluster)
+    y = clustering.labels_
+    dfCluster['cluster'] = y
+    clusters =[]
+    [distinct_vals, _] = unique(y, return_counts=True)
+    counts = len(distinct_vals)
+    for i in range(counts):
+       clusters.append(dfCluster[dfCluster.cluster==i])
+
+    return clusters
+
