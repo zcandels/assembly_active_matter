@@ -88,8 +88,23 @@ def makeClustersKmeans(dfCluster):
     return clusters
 
 def makeClustersDbscan(dfCluster):
+    """
+    Creates clusters of data based on the DBSCAN clustering algorithm
+    implemented in sklearn.
+
+    Parameters
+    ----------
+    dfCluster: pandas dataframe whose columns contain the (x,y) 
+    position of N particles and the velocity direction of the particles.
+
+    Returns
+    ---------
+    clusters: List of pandas dataframes where the columns of clusters[i] 
+    are 'x-positions', 'y-positions', and 'cluster', the latter 
+    containing the cluster to label to which a given particle belongs.
+    """
     from numpy import unique 
-    clustering = DBSCAN(eps = 0.2, min_samples=2).fit(dfCluster)
+    clustering = DBSCAN(eps = 0.2, min_samples=5).fit(dfCluster)
     y = clustering.labels_
     dfCluster['cluster'] = y
     clusters =[]

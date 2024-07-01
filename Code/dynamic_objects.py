@@ -29,38 +29,7 @@ def get_edges_vertices(cluster):
             edges.append(Edges[i])
             
     
-    return edges, vertices
-
-
-def visualize_results(clusters, step):
-    
-    import matplotlib.cm as cm
-    N_clus = len(clusters)
-    start = 0.0
-    stop = 1.0
-    cm_subsection = np.linspace(start, stop, N_clus)
-    colors = [ cm.jet(x) for x in cm_subsection ]
-    
-    
-    plt.rcParams['text.usetex'] = True
-    plt.figure()
-    for n in range(N_clus):
-        cluster = clusters[n]
-        x = cluster['x-position']
-        y = cluster['y-position']
-        theta = cluster['angle']
-        u = np.cos(theta)
-        v = np.sin(theta)
-        plt.quiver(x,y,u,v,color=colors[n])
-        plt.xlabel(r'$x$', fontsize=20)
-        plt.ylabel(r'$y$', fontsize=20)
-    plt.show()
-    
-    figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
-    plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
-    
-    return
-    
+    return edges, vertices   
 
 
 def generate_mol_file(clusters):
@@ -126,18 +95,70 @@ def call_assembly_code(num_clusters):
         
     
     return assembly_indices_single_timestep
+
+def visualize_clusters(clusters, step):
     
+    import matplotlib.cm as cm
+    N_clus = len(clusters)
+    start = 0.0
+    stop = 1.0
+    cm_subsection = np.linspace(start, stop, N_clus)
+    colors = [ cm.jet(x) for x in cm_subsection ]
+    
+    
+    plt.rcParams['text.usetex'] = True
+    plt.figure()
+    for n in range(N_clus):
+        cluster = clusters[n]
+        x = cluster['x-position']
+        y = cluster['y-position']
+        theta = cluster['angle']
+        u = np.cos(theta)
+        v = np.sin(theta)
+        plt.quiver(x,y,u,v,color=colors[n])
+        plt.xlabel(r'$x$', fontsize=20)
+        plt.ylabel(r'$y$', fontsize=20)
+    plt.show()
+    
+    figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
+    plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
+    
+    return
+    
+def cluster_histogram(clusters):
+    particle_distribution = []
+    for cluster in clusters:
+        num_particles = cluster.shape[0]
+        particle_distribution.append(num_particles)
+    mean = np.mean(particle_distribution)
+    variance = np.var(particle_distribution)
+    
+    plt.rcParams['text.usetex'] = True
+    fig, ax = plt.subplots()
+    ax.hist(particle_distribution, bins="auto", rwidth=0.8)
+    ax.set_xlabel(r"Particles per Cluster")
+    ax.set_ylabel(r"Count")
+    ax.annotate(r'$\mu = %d$' %mean, xy=(0.95, 0.9), xycoords='axes fraction',
+            fontsize=20, ha='right', va='top')
+    ax.annotate(r'$\sigma = %g$' %variance, xy=(0.95, 0.8), xycoords='axes fraction',
+            fontsize=20, ha='right', va='top')
+    #ax.annotate(r"$\sigma = %g$" % variance,  xytext=(0.75, 0.7), # fraction, fraction
+    #        textcoords='figure fraction',fontsize=15)
+
+    return
 
 
 def main():
+    from time import sleep
     plt.close('all')
     N = 300
     L = 7
     v = 0.03
     r = 1
     dt = 1
-    steps = 5
+    steps = 40
     assembly_indices_all_time = []
+    num_clusters = np.zeros(steps)
 
     eta = 0.1
     
@@ -151,9 +172,14 @@ def main():
             kinematic_df = clus.make_kinematic_df(pos, angles)
             
             clusters = clus.makeClustersDbscan(kinematic_df)
-            num_clusters = len(clusters)
+            num_clusters[n] = len(clusters)
             
-            visualize_results(clusters, n)
+            
+            print(num_clusters[n])
+            
+            # visualize_clusters(clusters, n)
+            if n%10 == 0:
+                cluster_histogram(clusters)
             
             # generate_mol_file(clusters)
 
@@ -168,6 +194,8 @@ def main():
             # plt.ylabel("Count")
             
             # assembly_indices_all_time.append(assembly_indices_step_n)
+            
+    
             
             
             
