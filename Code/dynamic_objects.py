@@ -4,102 +4,47 @@ import clustering_fns as clus
 import vic as vm
 
 
-def get_edges_vertices(cluster):
+class cluster():
+    def __init__(self, cluster_df):
+        self.clusterDataFrame = cluster_df
+        self.numParticles = cluster_df.shape[0]
     
-    cluster_positions = cluster[ ['x-position', 'y-position'] ]
-    from sklearn.neighbors import kneighbors_graph
-    graph1 = kneighbors_graph(cluster_positions, 2, mode='connectivity',
-                              include_self=True)
-    
-    
-    adj_mat = graph1.toarray()
-    vertices = list(range(len(adj_mat)))
-    
-    Edges = []
-    for i in range(len(adj_mat)):
-        for j in range(len(adj_mat)):
-            if i == j:
-                continue
-            if adj_mat[i,j] != 0:
-                Edges.append({i,j})
-    
-    edges = []
-    for i in range(len(Edges)):
-        if Edges[i] not in edges:
-            edges.append(Edges[i])
-            
-    
-    return edges, vertices   
-
-
-def generate_mol_file(clusters):
-    
-    
-    from rdkit import Chem
-    from rdkit import RDLogger 
-    from rdkit.Chem.rdchem import RWMol
-
-    def transfrom_bond(bond):
-        if bond == 1.0:
-            return Chem.rdchem.BondType.SINGLE
-        if bond == 2.0:
-            return Chem.rdchem.BondType.DOUBLE
-        if bond == 3.0:
-            return Chem.rdchem.BondType.TRIPLE
-        return "error"
-    
-    def transfrom_bond_float(bond):
-        if bond == "single":
-            return 1.0
-        if bond == "double":
-            return 2.0
-        if bond == "triple":
-            return 3.0
-        return "error"
-    
-    def tables2mol(tables):
-        atoms_info, bonds_info = tables
-        emol = RWMol()
-        for v in atoms_info:
-            emol.AddAtom(Chem.Atom(v[1]))
-        for e in bonds_info:
-            emol.AddBond(e[0], e[1], transfrom_bond(e[2]))
-        mol = emol.GetMol()
-        return mol
-    
-    for iter in range(len(clusters)):
-        edges, vertices = get_edges_vertices(clusters[iter])
-        bonds_info \
-            = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
-        atom_list = [ (j,"C") for j,i in enumerate(vertices)]
-        mol= tables2mol((atom_list,bonds_info))
-        fileName = f"mol_file_cluster_{iter}"
-        print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
-
-def call_assembly_code(num_clusters):
-    import subprocess
-    import re
-    
-    assembly_indices_single_timestep = []
-    for n in range(num_clusters):
-        subprocess.run(["assemblyCpp_256.exe", f"mol_file_cluster_{n}"])
+    def computeCentroid(self):
         
-        fName = f"mol_file_cluster_{n}Out"
+        positions = self.clusterDataFrame[ ['x-position', 'y-position'] ]
+        x_pos, y_pos = positions.iloc[:,0], positions.iloc[:,1]
+        x_com, y_com = 0., 0.
+        for i in range(len(x_pos)):
+            # x_com += positions.iloc[i,0]
+            # y_com += positions.iloc[i,1]
+            x_com += x_pos.iloc[i]
+            y_com += y_pos.iloc[i]
+        x_com = x_com/(len(x_pos))
+        y_com = y_com/(len(x_pos))
+        
+        self.centroid = np.array([x_com, y_com])
+        return
+
+    
+    def getAssemblyIndex(self):
+        import subprocess
+        import re
+        clus.generateMolFile(self.clusterDataFrame)
+        
+        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+        fName = "mol_fileOut"
         with open(fName, 'r') as file:
             content = file.read()
         numbers = re.findall(r'\d+', content)
         
         assembly_index = int(numbers[1])
-        assembly_indices_single_timestep.append(assembly_index)
-        print(assembly_index,",")
-        
-    
-    return assembly_indices_single_timestep
+        self.assemblyIndex = assembly_index
 
-def visualize_clusters(clusters, step):
+
+def visualize_clusters(cluster_dict, step):
     
     import matplotlib.cm as cm
-    N_clus = len(clusters)
+    N_clus = len(cluster_dict)
     start = 0.0
     stop = 1.0
     cm_subsection = np.linspace(start, stop, N_clus)
@@ -109,9 +54,10 @@ def visualize_clusters(clusters, step):
     plt.rcParams['text.usetex'] = True
     plt.figure()
     for n in range(N_clus):
-        cluster = clusters[n]
-        x = cluster['x-position']
-        y = cluster['y-position']
+        cluster = cluster_dict[n]
+        clusterDataFrame = cluster.clusterDataFrame
+        x = clusterDataFrame['x-position']
+        y = clusterDataFrame['y-position']
         theta = cluster['angle']
         u = np.cos(theta)
         v = np.sin(theta)
@@ -125,11 +71,11 @@ def visualize_clusters(clusters, step):
     
     return
     
-def cluster_histogram(clusters):
+def cluster_histogram(cluster_dict):
     particle_distribution = []
-    for cluster in clusters:
-        num_particles = cluster.shape[0]
-        particle_distribution.append(num_particles)
+    for _, cluster in cluster_dict.items():
+        numParticles = cluster.numParticles
+        particle_distribution.append(numParticles)
     mean = np.mean(particle_distribution)
     variance = np.var(particle_distribution)
     
@@ -147,6 +93,12 @@ def cluster_histogram(clusters):
 
     return
 
+def persistence(centroid):
+    return
+
+def get_identifier(cluster):
+    return
+
 
 def main():
     from time import sleep
@@ -157,29 +109,39 @@ def main():
     r = 1
     dt = 1
     steps = 40
-    assembly_indices_all_time = []
     num_clusters = np.zeros(steps)
+    objects = []
 
     eta = 0.1
     
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
 
     for n in range(steps):
+            cluster_dict = {}
 
             sim_vicsek.update()
             pos = sim_vicsek.get_positions()
             angles = sim_vicsek.get_velocities()
             kinematic_df = clus.make_kinematic_df(pos, angles)
             
-            clusters = clus.makeClustersDbscan(kinematic_df)
-            num_clusters[n] = len(clusters)
+            clusterList = clus.makeClustersDbscan(kinematic_df)
+            for ind in range(len(clusterList)):
+                cluster_dict[ind] = cluster(clusterList[ind])
+                cluster_dict[ind].computeCentroid()
+                cluster_dict[ind].getAssemblyIndex()
+            
+            a = cluster_dict[0]
+            a.computeCentroid()
+            print(a.centroid)
+            
+            cluster_histogram(cluster_dict)
             
             
-            print(num_clusters[n])
+      #      print(num_clusters[n])
             
             # visualize_clusters(clusters, n)
-            if n%10 == 0:
-                cluster_histogram(clusters)
+       #     if n%10 == 0:
+       #         cluster_histogram(clusters)
             
             # generate_mol_file(clusters)
 
