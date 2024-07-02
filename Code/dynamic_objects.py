@@ -29,6 +29,7 @@ class cluster():
     def getAssemblyIndex(self):
         import subprocess
         import re
+        clus.misc_fn(self.clusterDataFrame)
         clus.generateMolFile(self.clusterDataFrame)
         
         subprocess.run(["assemblyCpp_256.exe", "mol_file"])
@@ -108,8 +109,8 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 40
-    num_clusters = np.zeros(steps)
+    steps = 5
+    num_clusters = np.zeros(steps, dtype=int)
     objects = []
 
     eta = 0.1
@@ -125,7 +126,10 @@ def main():
             kinematic_df = clus.make_kinematic_df(pos, angles)
             
             clusterList = clus.makeClustersDbscan(kinematic_df)
-            for ind in range(len(clusterList)):
+            for ind in range(1, len(clusterList)):
+                # Change starting index of loop so we don't 
+                # create a cluster object for straggler particles
+                # i.e. particles for which their cluster label is -1.
                 cluster_dict[ind] = cluster(clusterList[ind])
                 cluster_dict[ind].computeCentroid()
                 cluster_dict[ind].getAssemblyIndex()

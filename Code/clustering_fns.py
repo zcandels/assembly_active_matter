@@ -106,12 +106,11 @@ def makeClustersDbscan(dfCluster):
     from numpy import unique 
     clustering = DBSCAN(eps = 0.2, min_samples=5).fit(dfCluster)
     y = clustering.labels_
-    dfCluster['cluster'] = y
+    dfCluster['cluster-label'] = y
     clusters =[]
     [distinct_vals, _] = unique(y, return_counts=True)
-    counts = len(distinct_vals)
-    for i in range(counts):
-       clusters.append(dfCluster[dfCluster.cluster==i])
+    for num in distinct_vals:
+       clusters.append(dfCluster[dfCluster.loc[:,'cluster-label']==num])
 
     return clusters
 
@@ -143,6 +142,24 @@ def computeEdgesVertices(clusterDataFrame):
 
     return edges, vertices
 
+def misc_fn(clusterDataFrame):
+    from rdkit import Chem
+    from rdkit import RDLogger 
+    from rdkit.Chem.rdchem import RWMol
+    a = 1
+    b = 2
+    
+    def transfrom_bond(bond):
+        if bond == 1.0:
+            return Chem.rdchem.BondType.SINGLE
+        if bond == 2.0:
+            return Chem.rdchem.BondType.DOUBLE
+        if bond == 3.0:
+            return Chem.rdchem.BondType.TRIPLE
+        return "error"
+    
+    edges, vertices = computeEdgesVertices(clusterDataFrame)
+    
 
 def generateMolFile(clusterDataFrame):
     from rdkit import Chem
@@ -177,10 +194,10 @@ def generateMolFile(clusterDataFrame):
         mol = emol.GetMol()
         return mol
     
-        edges, vertices = computeEdgesVertices(clusterDataFrame)
-        bonds_info \
-            = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
-        atom_list = [ (j,"C") for j,i in enumerate(vertices)]
-        mol= tables2mol((atom_list,bonds_info))
-        fileName = f"mol_file_cluster_{iter}"
-        print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
+    edges, vertices = computeEdgesVertices(clusterDataFrame)
+    bonds_info \
+        = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
+    atom_list = [ (j,"C") for j,i in enumerate(vertices)]
+    mol= tables2mol((atom_list,bonds_info))
+    fileName = f"mol_file"
+    print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
