@@ -151,14 +151,14 @@ def cluster_histogram(clusters):
 def main():
     from time import sleep
     plt.close('all')
-    N = 300
-    L = 7
+    N = 40
+    L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 40
+    steps = 5
     assembly_indices_all_time = []
-    num_clusters = np.zeros(steps)
+    num_clusters = np.zeros(steps,dtype=int)
 
     eta = 0.1
     
@@ -183,7 +183,7 @@ def main():
             
             generate_mol_file(clusters)
 
-            #assembly_indices_step_n = call_assembly_code(num_clusters)
+            assembly_indices_step_n = call_assembly_code(num_clusters[n])
             
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)
