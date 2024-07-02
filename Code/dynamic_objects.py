@@ -181,9 +181,9 @@ def main():
             if n%10 == 0:
                 cluster_histogram(clusters)
             
-            # generate_mol_file(clusters)
+            generate_mol_file(clusters)
 
-            # assembly_indices_step_n = call_assembly_code(num_clusters)
+            #assembly_indices_step_n = call_assembly_code(num_clusters)
             
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)

@@ -106,12 +106,12 @@ def makeClustersDbscan(dfCluster):
     from numpy import unique 
     clustering = DBSCAN(eps = 0.2, min_samples=5).fit(dfCluster)
     y = clustering.labels_
-    dfCluster['cluster'] = y
+    dfCluster['cluster-label'] = y
     clusters =[]
     [distinct_vals, _] = unique(y, return_counts=True)
     counts = len(distinct_vals)
-    for i in range(counts):
-       clusters.append(dfCluster[dfCluster.cluster==i])
+    for num in distinct_vals:
+       clusters.append(dfCluster[dfCluster.cluster==num])
 
     return clusters
 
