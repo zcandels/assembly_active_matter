@@ -40,7 +40,7 @@ class cluster():
             content = file.read()
         numbers = re.findall(r'\d+', content)
         
-        assembly_index = int(numbers[1])
+        assembly_index = int(numbers[0])
         self.assemblyIndex = assembly_index
 
 class dynamic_object():
@@ -50,20 +50,27 @@ class dynamic_object():
         self.assemblyIndex = assemblyIndex
         self.area = area
         self.persistence = "default"
-        self.object_dict = {"CoM": [centroidPosition],
+        self.data_dict = {"CoM": [centroidPosition],
                             "numParticles": [numParticles],
                             "assemblyIndex": [assemblyIndex],
                             "area": [area], "lifeTime": 1}
     
-    def updateObjectDict(self, centroidPosition,
+    def updateObject(self, centroidPosition,
                          numParticles, assemblyIndex, area):
-        objDict = self.object_dict
+        objDict = self.data_dict
         objDict["CoM"].append(centroidPosition)
         objDict["numParticles"].append(numParticles)
         objDict["assemblyIndex"].append(assemblyIndex)
         objDict["area"].append(area)
         objDict["lifeTime"] += 1
         return
+    
+def getObjectKey(object_dict, centroid, epsilon):
+    for obj in object_dict:
+        obj_centroid = object_dict[obj].data_dict["CoM"][-1]
+        if np.linalg.norm(obj_centroid - centroid) < epsilon:
+            key = obj
+    return key
 
 
 def visualize_clusters(cluster_dict, step):
@@ -126,7 +133,6 @@ def get_identifier(cluster):
 
 
 def main():
-    from time import sleep
     plt.close('all')
     N = 300
     L = 3.1
@@ -139,7 +145,7 @@ def main():
     num_clusters = np.zeros(steps, dtype=int)
     object_dict = {}
     centroids_nmp1 = []
-    epsilon = 2*v
+    epsilon = 3*v
 
     eta = 0.1
     
@@ -163,8 +169,9 @@ def main():
                 cluster_dict[ind] = cluster(clusterList[ind])
                 cluster_dict[ind].computeCentroid()
                 cluster_dict[ind].getAssemblyIndex()
+                #print(cluster_dict[ind].assemblyIndex)
                 
-                if n >= 2:
+                if n == 2:
                     centroid = cluster_dict[ind].centroid
                     directed_dist_vec = centroids_nmp1 - centroid
                     distances = np.linalg.norm(directed_dist_vec, axis=1 )
@@ -176,9 +183,49 @@ def main():
                             area = 1
                             # add some statement to see if the condition
                             # is satisfied for multiple clusters
-                            key = f"step{n}_obj{ctr}"
+                            key = f"obj{ctr}"
                             object_dict[key] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
+#                            print("n = ", n)
+#                            print(object_dict[key].centroidPosition)
+                elif n > 2:
+                    centroid = cluster_dict[ind].centroid
+                    directed_dist_vec = centroids_nmp1 - centroid
+                    distances = np.linalg.norm( directed_dist_vec, axis=1 )
+                    for d in distances:
+                        if d < epsilon:
+                            distances = []
+                            for _, val in object_dict.items():
+                                obj_CoM = val.centroidPosition
+                                if np.linalg.norm(obj_CoM - centroid) < epsilon:
+                                    aInd = cluster_dict[ind].assemblyIndex
+                                    numParticles = cluster_dict[ind].numParticles
+                                    area = 1. 
+
+                                    key = getObjectKey(object_dict,
+                                                       centroid,
+                                                       epsilon)
+                                    
+                                    object_dict[str(key)].updateObject(centroid,
+                                                             aInd, 
+                                                             numParticles,
+                                                             area)
+            ##############################################################
+                            ctr += 1 
+                            numParticles = cluster_dict[ind].numParticles
+                            assemblyIndex = cluster_dict[ind].assemblyIndex
+                            area = 1
+                            key = f"obj{ctr}"
+                            object_dict[key] = dynamic_object(
+                                centroid, numParticles, assemblyIndex, area)
+                                    
+                                
+           ### I think this works but tomorrow check to make sure that when
+           ### executing everything below line 213 that a new object is
+           ### created and that you're not just reassigning new properties
+           ### to a dictionary key that already exists.
+                    
+                
                 
             
             cluster_histogram(cluster_dict)
