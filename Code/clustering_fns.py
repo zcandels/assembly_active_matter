@@ -109,10 +109,6 @@ def makeClustersDbscan(dfCluster):
     dfCluster['cluster-label'] = y
     clusters =[]
     [distinct_vals, _] = unique(y, return_counts=True)
-<<<<<<< HEAD
-=======
-    counts = len(distinct_vals)
->>>>>>> main
     for num in distinct_vals:
        clusters.append(dfCluster[dfCluster.loc[:,'cluster-label']==num])
 
