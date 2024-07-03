@@ -109,9 +109,82 @@ def makeClustersDbscan(dfCluster):
     dfCluster['cluster-label'] = y
     clusters =[]
     [distinct_vals, _] = unique(y, return_counts=True)
+<<<<<<< HEAD
+=======
     counts = len(distinct_vals)
+>>>>>>> main
     for num in distinct_vals:
        clusters.append(dfCluster[dfCluster.loc[:,'cluster-label']==num])
 
     return clusters
 
+
+
+def computeEdgesVertices(clusterDataFrame):
+    cluster_positions\
+        = clusterDataFrame[ ['x-position', 'y-position'] ].values
+    from sklearn.neighbors import kneighbors_graph
+    graph1 = kneighbors_graph(cluster_positions, 2, mode='connectivity',
+                          include_self=True)
+
+
+    adj_mat = graph1.toarray()
+    vertices = list(range(len(adj_mat)))
+
+    Edges = []
+    for i in range(len(adj_mat)):
+        for j in range(len(adj_mat)):
+            if i == j:
+                continue
+            if adj_mat[i,j] != 0:
+                Edges.append({i,j})
+
+    edges = []
+    for i in range(len(Edges)):
+        if Edges[i] not in edges:
+            edges.append(Edges[i])
+        
+
+    return edges, vertices
+    
+
+def generateMolFile(clusterDataFrame):
+    from rdkit import Chem
+    from rdkit import RDLogger 
+    from rdkit.Chem.rdchem import RWMol
+
+    def transfrom_bond(bond):
+        if bond == 1.0:
+            return Chem.rdchem.BondType.SINGLE
+        if bond == 2.0:
+            return Chem.rdchem.BondType.DOUBLE
+        if bond == 3.0:
+            return Chem.rdchem.BondType.TRIPLE
+        return "error"
+    
+    def transfrom_bond_float(bond):
+        if bond == "single":
+            return 1.0
+        if bond == "double":
+            return 2.0
+        if bond == "triple":
+            return 3.0
+        return "error"
+    
+    def tables2mol(tables):
+        atoms_info, bonds_info = tables
+        emol = RWMol()
+        for v in atoms_info:
+            emol.AddAtom(Chem.Atom(v[1]))
+        for e in bonds_info:
+            emol.AddBond(e[0], e[1], transfrom_bond(e[2]))
+        mol = emol.GetMol()
+        return mol
+    
+    edges, vertices = computeEdgesVertices(clusterDataFrame)
+    bonds_info \
+        = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
+    atom_list = [ (j,"C") for j,i in enumerate(vertices)]
+    mol= tables2mol((atom_list,bonds_info))
+    fileName = f"mol_file"
+    print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))

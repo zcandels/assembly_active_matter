@@ -1,0 +1,22 @@
+{
+"file_graph":[
+{
+"Vertices": [0,1,2,3,4],
+"Edges": [[0,2],[1,3],[3,4]],
+"VertexColours": ["C","C","C","C","C"],
+"EdgeColours": ["single","single","single"]
+}
+],
+"remnant":[
+{
+"Vertices": [0,1,2,3,4],
+"Edges": [[0,2],[1,3],[3,4]],
+"VertexColours": ["C","C","C","C","C"],
+"EdgeColours": ["single","single","single"]
+}
+],
+"duplicates":[
+
+],
+"removed_edges":[]
+}
