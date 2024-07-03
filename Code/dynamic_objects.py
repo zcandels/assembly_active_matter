@@ -109,13 +109,8 @@ def main():
     r = 1
     dt = 1
     steps = 5
-<<<<<<< HEAD
     num_clusters = np.zeros(steps, dtype=int)
     objects = []
-=======
-    assembly_indices_all_time = []
-    num_clusters = np.zeros(steps,dtype=int)
->>>>>>> main
 
     eta = 0.1
     
@@ -143,17 +138,8 @@ def main():
             
             # visualize_clusters(clusters, n)
             if n%10 == 0:
-<<<<<<< HEAD
                 cluster_histogram(cluster_dict)
                 
-=======
-                cluster_histogram(clusters)
-            
-            generate_mol_file(clusters)
-
-            assembly_indices_step_n = call_assembly_code(num_clusters[n])
-            
->>>>>>> main
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)
 
