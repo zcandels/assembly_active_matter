@@ -29,7 +29,6 @@ class cluster():
     def getAssemblyIndex(self):
         import subprocess
         import re
-        clus.misc_fn(self.clusterDataFrame)
         clus.generateMolFile(self.clusterDataFrame)
         
         subprocess.run(["assemblyCpp_256.exe", "mol_file"])
@@ -134,23 +133,13 @@ def main():
                 cluster_dict[ind].computeCentroid()
                 cluster_dict[ind].getAssemblyIndex()
             
-            a = cluster_dict[0]
-            a.computeCentroid()
-            print(a.centroid)
-            
             cluster_histogram(cluster_dict)
             
             
-      #      print(num_clusters[n])
-            
             # visualize_clusters(clusters, n)
-       #     if n%10 == 0:
-       #         cluster_histogram(clusters)
-            
-            # generate_mol_file(clusters)
-
-            # assembly_indices_step_n = call_assembly_code(num_clusters)
-            
+            if n%10 == 0:
+                cluster_histogram(cluster_dict)
+                
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)
 

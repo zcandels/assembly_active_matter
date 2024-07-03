@@ -117,7 +117,8 @@ def makeClustersDbscan(dfCluster):
 
 
 def computeEdgesVertices(clusterDataFrame):
-    cluster_positions = clusterDataFrame[ ['x-position', 'y-position'] ]
+    cluster_positions\
+        = clusterDataFrame[ ['x-position', 'y-position'] ].values
     from sklearn.neighbors import kneighbors_graph
     graph1 = kneighbors_graph(cluster_positions, 2, mode='connectivity',
                           include_self=True)
@@ -141,24 +142,6 @@ def computeEdgesVertices(clusterDataFrame):
         
 
     return edges, vertices
-
-def misc_fn(clusterDataFrame):
-    from rdkit import Chem
-    from rdkit import RDLogger 
-    from rdkit.Chem.rdchem import RWMol
-    a = 1
-    b = 2
-    
-    def transfrom_bond(bond):
-        if bond == 1.0:
-            return Chem.rdchem.BondType.SINGLE
-        if bond == 2.0:
-            return Chem.rdchem.BondType.DOUBLE
-        if bond == 3.0:
-            return Chem.rdchem.BondType.TRIPLE
-        return "error"
-    
-    edges, vertices = computeEdgesVertices(clusterDataFrame)
     
 
 def generateMolFile(clusterDataFrame):
