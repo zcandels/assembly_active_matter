@@ -46,34 +46,34 @@ class cluster():
 
 class dynamic_object():
     def __init__(self, centroidPosition, numParticles, assemblyIndex, area):
-        self.centroidPosition = centroidPosition
-        self.numParticles = numParticles
-        self.assemblyIndex = assemblyIndex
-        self.area = area
+        self.centroidPosition = [centroidPosition]
+        self.numParticles = [numParticles]
+        self.assemblyIndex = [assemblyIndex]
+        self.area = [area]
         self.lifeTime = 1
-        self.data_dict = {"CoM": [centroidPosition],
-                            "numParticles": [numParticles],
-                            "assemblyIndex": [assemblyIndex],
-                            "area": [area], "lifeTime": 1}
+        # self.data_dict = {"CoM": [centroidPosition],
+        #                    "numParticles": [numParticles],
+        #                    "assemblyIndex": [assemblyIndex],
+        #                    "area": [area], "lifeTime": 1}
     
     def updateObject(self, centroidPosition,
                          numParticles, assemblyIndex, area):
-        self.centroidPosition = centroidPosition
-        self.numParticles = numParticles
-        self.assemblyIndex = assemblyIndex
-        self.area = area
+        self.centroidPosition.append(centroidPosition)
+        self.numParticles.append(numParticles)
+        self.assemblyIndex.append(assemblyIndex)
+        self.area.append(area)
         self.lifeTime += 1
-        objDict = self.data_dict
-        objDict["CoM"].append(centroidPosition)
-        objDict["numParticles"].append(numParticles)
-        objDict["assemblyIndex"].append(assemblyIndex)
-        objDict["area"].append(area)
-        objDict["lifeTime"] += 1
+        #objDict = self.data_dict
+        #objDict["CoM"].append(centroidPosition)
+        #objDict["numParticles"].append(numParticles)
+        #objDict["assemblyIndex"].append(assemblyIndex)
+        #objDict["area"].append(area)
+        #objDict["lifeTime"] += 1
         return
     
 def getObjectKey(object_dict, centroid, epsilon):
     for obj in object_dict:
-        obj_centroid = object_dict[obj].data_dict["CoM"][-1]
+        obj_centroid = object_dict[obj].centroidPosition[-1]
         if np.linalg.norm(obj_centroid - centroid) < epsilon:
             key = obj
     return key
@@ -202,6 +202,9 @@ def main():
                     for d in distances:
                         if d < epsilon:
                             distances = []
+                            # Loop through all extant objects to see if 
+                            # the current cluster already has a 
+                            # corresponding object of type dynamic_object.
                             for _, val in object_dict.items():
                                 obj_CoM = val.centroidPosition
                                 if np.linalg.norm(obj_CoM - centroid) < epsilon:
@@ -218,6 +221,8 @@ def main():
                                                              numParticles,
                                                              area)
             ##############################################################
+                            # If the object is new, create a new 
+                            # instance of the class dynamic_object.
                             newObjectCtr += 1 
                             numParticles = cluster_dict[ind].numParticles
                             assemblyIndex = cluster_dict[ind].assemblyIndex
@@ -225,12 +230,6 @@ def main():
                             key = f"obj{newObjectCtr}"
                             object_dict[key] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
-                                    
-                                
-           ### I think this works but tomorrow check to make sure that when
-           ### executing everything below line 213 that a new object is
-           ### created and that you're not just reassigning new properties
-           ### to a dictionary key that already exists.
             
             
             # visualize_clusters(clusters, n)
