@@ -11,7 +11,7 @@ class cluster():
         self.numParticles = cluster_df.shape[0]
         self.centroid = "default"
         self.assemblyIndex = "default"
-    
+
     def computeCentroid(self):
         
         positions = self.clusterDataFrame[ ['x-position', 'y-position'] ]
@@ -43,13 +43,14 @@ class cluster():
         assembly_index = int(numbers[0])
         self.assemblyIndex = assembly_index
 
+
 class dynamic_object():
     def __init__(self, centroidPosition, numParticles, assemblyIndex, area):
         self.centroidPosition = centroidPosition
         self.numParticles = numParticles
         self.assemblyIndex = assemblyIndex
         self.area = area
-        self.persistence = "default"
+        self.lifeTime = 1
         self.data_dict = {"CoM": [centroidPosition],
                             "numParticles": [numParticles],
                             "assemblyIndex": [assemblyIndex],
@@ -57,6 +58,11 @@ class dynamic_object():
     
     def updateObject(self, centroidPosition,
                          numParticles, assemblyIndex, area):
+        self.centroidPosition = centroidPosition
+        self.numParticles = numParticles
+        self.assemblyIndex = assemblyIndex
+        self.area = area
+        self.lifeTime += 1
         objDict = self.data_dict
         objDict["CoM"].append(centroidPosition)
         objDict["numParticles"].append(numParticles)
@@ -150,7 +156,8 @@ def main():
     eta = 0.1
     
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
-
+    
+    newObjectCtr = 0
     for n in range(steps):
             cluster_dict = {}
 
@@ -161,7 +168,7 @@ def main():
             
             clusterList = clus.makeClustersDbscan(kinematic_df)
             #centroids = []
-            ctr = 0
+            
             for ind in range(1, len(clusterList)):
                 # Change starting index of loop so we don't 
                 # create a cluster object for straggler particles
@@ -177,13 +184,13 @@ def main():
                     distances = np.linalg.norm(directed_dist_vec, axis=1 )
                     for d in distances:
                         if d < epsilon:
-                            ctr += 1
+                            newObjectCtr += 1
                             numParticles = cluster_dict[ind].numParticles
                             assemblyIndex = cluster_dict[ind].assemblyIndex
                             area = 1
                             # add some statement to see if the condition
                             # is satisfied for multiple clusters
-                            key = f"obj{ctr}"
+                            key = f"obj{newObjectCtr}"
                             object_dict[key] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
 #                            print("n = ", n)
@@ -211,11 +218,11 @@ def main():
                                                              numParticles,
                                                              area)
             ##############################################################
-                            ctr += 1 
+                            newObjectCtr += 1 
                             numParticles = cluster_dict[ind].numParticles
                             assemblyIndex = cluster_dict[ind].assemblyIndex
                             area = 1
-                            key = f"obj{ctr}"
+                            key = f"obj{newObjectCtr}"
                             object_dict[key] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
                                     
@@ -224,11 +231,6 @@ def main():
            ### executing everything below line 213 that a new object is
            ### created and that you're not just reassigning new properties
            ### to a dictionary key that already exists.
-                    
-                
-                
-            
-            cluster_histogram(cluster_dict)
             
             
             # visualize_clusters(clusters, n)
