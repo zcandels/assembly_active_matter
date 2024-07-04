@@ -164,7 +164,7 @@ def main():
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
     
     dynObjectId = 0
-    DoA_dict = {dynObjectId: 0}
+    DoA_dict = {}
     for n in range(steps):
             cluster_dict = {}
 
@@ -226,6 +226,8 @@ def main():
                                                              aInd, 
                                                              numParticles,
                                                              area)
+                                    DoA_dict[dynObjectId] = 1
+                                    
                     
             ##############################################################
                             # If the object is new, create a new 
@@ -236,20 +238,32 @@ def main():
                             area = 1
                             object_dict[dynObjectId] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
+                            DoA_dict[dynObjectId] = 1
+                            # Might not need the above line since 
+                            # We only update the DoA dictionary
+                            # when an object is updated to show that it is
+                            # still alive. By default, when an object dyn_obj
+                            # is created, dyn_obj.DoA = "Alive"
             
-            #for dynObjectId, DoA in DoA_dict.items():
-            #    if DoA == 0:
-            #        object_dict[dynObjectId].deathCertificate()
+            for dynObjectId, DoA in DoA_dict.items():
+                if DoA == 0:
+                    object_dict[dynObjectId].deathCertificate()
             
             
             # visualize_clusters(clusters, n)
-            if n%10 == 0:
-                cluster_histogram(cluster_dict)
+            #if n%10 == 0:
+            #    cluster_histogram(cluster_dict)
 
             centroids_nmp1 = []
             for _, clusterObject in cluster_dict.items():
                 centroids_nmp1.append(clusterObject.centroid)
             centroids_nmp1 = np.asarray(centroids_nmp1)
+            
+            if n >= 2:
+                for key in object_dict:
+                    DoA_dict[key] = 0
+            
+            ran_var = 2
 
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)
