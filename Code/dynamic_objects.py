@@ -51,6 +51,7 @@ class dynamic_object():
         self.assemblyIndex = [assemblyIndex]
         self.area = [area]
         self.lifeTime = 1
+        self.DoA = "Alive"
         # self.data_dict = {"CoM": [centroidPosition],
         #                    "numParticles": [numParticles],
         #                    "assemblyIndex": [assemblyIndex],
@@ -63,6 +64,7 @@ class dynamic_object():
         self.assemblyIndex.append(assemblyIndex)
         self.area.append(area)
         self.lifeTime += 1
+        self.DoA = "Alive"
         #objDict = self.data_dict
         #objDict["CoM"].append(centroidPosition)
         #objDict["numParticles"].append(numParticles)
@@ -70,6 +72,10 @@ class dynamic_object():
         #objDict["area"].append(area)
         #objDict["lifeTime"] += 1
         return
+    
+    def deathCertificate(self):
+        self.DoA = "Dead"
+    
     
 def getObjectKey(object_dict, centroid, epsilon):
     for obj in object_dict:
@@ -157,7 +163,8 @@ def main():
     
     sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
     
-    newObjectCtr = 0
+    dynObjectId = 0
+    DoA_dict = {}
     for n in range(steps):
             cluster_dict = {}
 
@@ -184,17 +191,16 @@ def main():
                     distances = np.linalg.norm(directed_dist_vec, axis=1 )
                     for d in distances:
                         if d < epsilon:
-                            newObjectCtr += 1
+                            dynObjectId += 1
                             numParticles = cluster_dict[ind].numParticles
                             assemblyIndex = cluster_dict[ind].assemblyIndex
                             area = 1
                             # add some statement to see if the condition
                             # is satisfied for multiple clusters
-                            key = f"obj{newObjectCtr}"
-                            object_dict[key] = dynamic_object(
+                            key = dynObjectId
+                            object_dict[dynObjectId] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
-#                            print("n = ", n)
-#                            print(object_dict[key].centroidPosition)
+                            DoA_dict[dynObjectId] = 1
                 elif n > 2:
                     centroid = cluster_dict[ind].centroid
                     directed_dist_vec = centroids_nmp1 - centroid
@@ -212,34 +218,52 @@ def main():
                                     numParticles = cluster_dict[ind].numParticles
                                     area = 1. 
 
-                                    key = getObjectKey(object_dict,
+                                    dynObjectId = getObjectKey(object_dict,
                                                        centroid,
                                                        epsilon)
                                     
-                                    object_dict[str(key)].updateObject(centroid,
+                                    object_dict[dynObjectId].updateObject(centroid,
                                                              aInd, 
                                                              numParticles,
                                                              area)
+                                    DoA_dict[dynObjectId] = 1
+                                    
+                    
             ##############################################################
                             # If the object is new, create a new 
                             # instance of the class dynamic_object.
-                            newObjectCtr += 1 
+                            dynObjectId += 1 
                             numParticles = cluster_dict[ind].numParticles
                             assemblyIndex = cluster_dict[ind].assemblyIndex
                             area = 1
-                            key = f"obj{newObjectCtr}"
-                            object_dict[key] = dynamic_object(
+                            object_dict[dynObjectId] = dynamic_object(
                                 centroid, numParticles, assemblyIndex, area)
+                            DoA_dict[dynObjectId] = 1
+                            # Might not need the above line since 
+                            # We only update the DoA dictionary
+                            # when an object is updated to show that it is
+                            # still alive. By default, when an object dyn_obj
+                            # is created, dyn_obj.DoA = "Alive"
+            
+            for dynObjectId, DoA in DoA_dict.items():
+                if DoA == 0:
+                    object_dict[dynObjectId].deathCertificate()
             
             
             # visualize_clusters(clusters, n)
-            if n%10 == 0:
-                cluster_histogram(cluster_dict)
+            #if n%10 == 0:
+            #    cluster_histogram(cluster_dict)
 
             centroids_nmp1 = []
             for _, clusterObject in cluster_dict.items():
                 centroids_nmp1.append(clusterObject.centroid)
             centroids_nmp1 = np.asarray(centroids_nmp1)
+            
+            if n >= 2:
+                for key in object_dict:
+                    DoA_dict[key] = 0
+            
+            ran_var = 2
 
             # diff = np.max(assembly_indices_step_n)\
             #     - np.min(assembly_indices_step_n)
