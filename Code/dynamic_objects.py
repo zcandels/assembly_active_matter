@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import clustering_fns as clus
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
-import vic as vm
+import vic
+import visualization_module as vm
 
 
 class cluster():
@@ -84,58 +85,6 @@ def getObjectKey(object_dict, centroid, epsilon):
             key = obj
     return key
 
-
-def visualize_clusters(cluster_dict, step):
-    
-    import matplotlib.cm as cm
-    N_clus = len(cluster_dict)
-    start = 0.0
-    stop = 1.0
-    cm_subsection = np.linspace(start, stop, N_clus)
-    colors = [ cm.jet(x) for x in cm_subsection ]
-    
-    
-    plt.rcParams['text.usetex'] = True
-    plt.figure()
-    for n in range(N_clus):
-        cluster = cluster_dict[n]
-        clusterDataFrame = cluster.clusterDataFrame
-        x = clusterDataFrame['x-position']
-        y = clusterDataFrame['y-position']
-        theta = cluster['angle']
-        u = np.cos(theta)
-        v = np.sin(theta)
-        plt.quiver(x,y,u,v,color=colors[n])
-        plt.xlabel(r'$x$', fontsize=20)
-        plt.ylabel(r'$y$', fontsize=20)
-    plt.show()
-    
-    figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
-    plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
-    
-    return
-    
-def cluster_histogram(cluster_dict):
-    particle_distribution = []
-    for _, cluster in cluster_dict.items():
-        numParticles = cluster.numParticles
-        particle_distribution.append(numParticles)
-    mean = np.mean(particle_distribution)
-    variance = np.var(particle_distribution)
-    
-    plt.rcParams['text.usetex'] = True
-    fig, ax = plt.subplots()
-    ax.hist(particle_distribution, bins="auto", rwidth=0.8)
-    ax.set_xlabel(r"Particles per Cluster")
-    ax.set_ylabel(r"Count")
-    ax.annotate(r'$\mu = %d$' %mean, xy=(0.95, 0.9), xycoords='axes fraction',
-            fontsize=20, ha='right', va='top')
-    ax.annotate(r'$\sigma = %g$' %variance, xy=(0.95, 0.8), xycoords='axes fraction',
-            fontsize=20, ha='right', va='top')
-    #ax.annotate(r"$\sigma = %g$" % variance,  xytext=(0.75, 0.7), # fraction, fraction
-    #        textcoords='figure fraction',fontsize=15)
-
-    return
 
 
 def do_timesteps(steps, sim_vicsek, epsilon):
@@ -230,9 +179,9 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                         object_dict[dynObjectId].deathCertificate()
         
         
-        # visualize_clusters(clusters, n)
-        #if n%10 == 0:
-        #    cluster_histogram(cluster_dict)
+        #vm.visualize_clusters(clusters, n)
+        if n%10 == 0:
+            vm.cluster_histogram(cluster_dict)
 
         centroids_nmp1 = []
         for _, clusterObject in cluster_dict.items():
@@ -261,7 +210,7 @@ def main():
 
     eta = 0.1
     
-    sim_vicsek = vm.VicsekModel(N, L, v, eta, r, dt)
+    sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
     
     object_dict = do_timesteps(steps, sim_vicsek, epsilon)
             
