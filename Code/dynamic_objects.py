@@ -138,133 +138,112 @@ def cluster_histogram(cluster_dict):
     return
 
 
-def update_sim(n, sim_vicsek, epsilon):
-    if n == 0:
-        dynObjectId = 0
-        object_dict = {}
-        DoA_dict = {}
-        
+def do_timesteps(steps, sim_vicsek, epsilon):
+    dynObjectId = 0
+    object_dict = {}
+    DoA_dict = {}
+            
     centroids_nmp1 = []
     cluster_dict = {}
-
-    sim_vicsek.update()
-    pos = sim_vicsek.get_positions()
-    angles = sim_vicsek.get_velocities()
-    kinematic_df = clus.make_kinematic_df(pos, angles)
-    
-    clusterList = clus.makeClustersDbscan(kinematic_df)
-    #centroids = []
-    
-    for ind in range(1, len(clusterList)):
-        # Change starting index of loop so we don't 
-        # create a cluster object for straggler particles
-        # i.e. particles for which their cluster label is -1.
-        cluster_dict[ind] = cluster(clusterList[ind])
-        cluster_dict[ind].computeCentroid()
-        cluster_dict[ind].getAssemblyIndex()
-        #print(cluster_dict[ind].assemblyIndex)
-        
-        if n == 2:
-            centroid = cluster_dict[ind].centroid
-            directed_dist_vec = centroids_nmp1 - centroid
-            distances = np.linalg.norm(directed_dist_vec, axis=1 )
-            for d in distances:
-                if d < epsilon:
-                    dynObjectId += 1
-                    numParticles = cluster_dict[ind].numParticles
-                    assemblyIndex = cluster_dict[ind].assemblyIndex
-                    area = 1
-                    # add some statement to see if the condition
-                    # is satisfied for multiple clusters
-                    key = dynObjectId
-                    object_dict[dynObjectId] = dynamic_object(
-                        centroid, numParticles, assemblyIndex, area)
-                    DoA_dict[dynObjectId] = 1
-        elif n > 2:
-            centroid = cluster_dict[ind].centroid
-            directed_dist_vec = centroids_nmp1 - centroid
-            distances = np.linalg.norm( directed_dist_vec, axis=1 )
-            for d in distances:
-                if d < epsilon:
-                    distances = []
-                    # Loop through all extant objects to see if 
-                    # the current cluster already has a 
-                    # corresponding object of type dynamic_object.
-                    for _, val in object_dict.items():
-                        obj_CoM = val.centroidPosition
-                        if np.linalg.norm(obj_CoM - centroid) < epsilon:
-                            aInd = cluster_dict[ind].assemblyIndex
-                            numParticles = cluster_dict[ind].numParticles
-                            area = 1. 
-
-                            dynObjectId = getObjectKey(object_dict,
-                                               centroid,
-                                               epsilon)
-                            
-                            object_dict[dynObjectId].updateObject(centroid,
-                                                     aInd, 
-                                                     numParticles,
-                                                     area)
-                            DoA_dict[dynObjectId] = 1
-                            
-            
-    ##############################################################
-                    # If the object is new, create a new 
-                    # instance of the class dynamic_object.
-                    dynObjectId += 1 
-                    numParticles = cluster_dict[ind].numParticles
-                    assemblyIndex = cluster_dict[ind].assemblyIndex
-                    area = 1
-                    object_dict[dynObjectId] = dynamic_object(
-                        centroid, numParticles, assemblyIndex, area)
-                    DoA_dict[dynObjectId] = 1
-                    # Might not need the above line since 
-                    # We only update the DoA dictionary
-                    # when an object is updated to show that it is
-                    # still alive. By default, when an object dyn_obj
-                    # is created, dyn_obj.DoA = "Alive"
-                    
-                   # statements only executed if n > 2.
-            for dynObjectId, DoA in DoA_dict.items():
-                if DoA == 0:
-                    object_dict[dynObjectId].deathCertificate()
-    
-    
-    # visualize_clusters(clusters, n)
-    #if n%10 == 0:
-    #    cluster_histogram(cluster_dict)
-
-    centroids_nmp1 = []
-    for _, clusterObject in cluster_dict.items():
-        centroids_nmp1.append(clusterObject.centroid)
-    centroids_nmp1 = np.asarray(centroids_nmp1)
-    
-    if n >= 2:
-        for key in object_dict:
-            DoA_dict[key] = 0
-    
-
-    # diff = np.max(assembly_indices_step_n)\
-    #     - np.min(assembly_indices_step_n)
-
-    # plt.figure()
-    # plt.hist(assembly_indices_step_n, diff, histtype='bar')
-    # plt.xlabel(r"Assembly Index $a$")
-    # plt.ylabel("Count")
-    
-    # assembly_indices_all_time.append(assembly_indices_step_n)
-    return object_dict
-
-def do_timesteps(steps, sim_vicsek, epsilon):
     for n in range(steps):
-        object_dict = update_sim(n, sim_vicsek, epsilon)
-    return object_dict
+
+        sim_vicsek.update()
+        pos = sim_vicsek.get_positions()
+        angles = sim_vicsek.get_velocities()
+        kinematic_df = clus.make_kinematic_df(pos, angles)
         
-# Problem is that object_dict is only initialized if n == 1. Otherwise
-# there exists no such variable. One quick and dirty way to get around this 
-# is to simply pass object_dict (and DoA_dict, for that matter), as arguments
-# to the function 'update_sim' at every time step. Whether or not 
-# this is ideal... I'm not sure.     
+        clusterList = clus.makeClustersDbscan(kinematic_df)
+        #centroids = []
+        
+        for ind in range(1, len(clusterList)):
+            # Change starting index of loop so we don't 
+            # create a cluster object for straggler particles
+            # i.e. particles for which their cluster label is -1.
+            cluster_dict[ind] = cluster(clusterList[ind])
+            cluster_dict[ind].computeCentroid()
+            cluster_dict[ind].getAssemblyIndex()
+            #print(cluster_dict[ind].assemblyIndex)
+            
+            if n == 2:
+                centroid = cluster_dict[ind].centroid
+                directed_dist_vec = centroids_nmp1 - centroid
+                distances = np.linalg.norm(directed_dist_vec, axis=1 )
+                for d in distances:
+                    if d < epsilon:
+                        dynObjectId += 1
+                        numParticles = cluster_dict[ind].numParticles
+                        assemblyIndex = cluster_dict[ind].assemblyIndex
+                        area = 1
+                        # add some statement to see if the condition
+                        # is satisfied for multiple clusters
+                        key = dynObjectId
+                        object_dict[dynObjectId] = dynamic_object(
+                            centroid, numParticles, assemblyIndex, area)
+                        DoA_dict[dynObjectId] = 1
+            elif n > 2:
+                centroid = cluster_dict[ind].centroid
+                directed_dist_vec = centroids_nmp1 - centroid
+                distances = np.linalg.norm( directed_dist_vec, axis=1 )
+                for d in distances:
+                    if d < epsilon:
+                        distances = []
+                        # Loop through all extant objects to see if 
+                        # the current cluster already has a 
+                        # corresponding object of type dynamic_object.
+                        for _, val in object_dict.items():
+                            obj_CoM = val.centroidPosition
+                            if np.linalg.norm(obj_CoM - centroid) < epsilon:
+                                aInd = cluster_dict[ind].assemblyIndex
+                                numParticles = cluster_dict[ind].numParticles
+                                area = 1. 
+
+                                dynObjectId = getObjectKey(object_dict,
+                                                   centroid,
+                                                   epsilon)
+                                
+                                object_dict[dynObjectId].updateObject(centroid,
+                                                         aInd, 
+                                                         numParticles,
+                                                         area)
+                                DoA_dict[dynObjectId] = 1
+                                
+                
+        ##############################################################
+                        # If the object is new, create a new 
+                        # instance of the class dynamic_object.
+                        dynObjectId += 1 
+                        numParticles = cluster_dict[ind].numParticles
+                        assemblyIndex = cluster_dict[ind].assemblyIndex
+                        area = 1
+                        object_dict[dynObjectId] = dynamic_object(
+                            centroid, numParticles, assemblyIndex, area)
+                        DoA_dict[dynObjectId] = 1
+                        # Might not need the above line since 
+                        # We only update the DoA dictionary
+                        # when an object is updated to show that it is
+                        # still alive. By default, when an object dyn_obj
+                        # is created, dyn_obj.DoA = "Alive"
+                        
+                       # statements only executed if n > 2.
+                for dynObjectId, DoA in DoA_dict.items():
+                    if DoA == 0:
+                        object_dict[dynObjectId].deathCertificate()
+        
+        
+        # visualize_clusters(clusters, n)
+        #if n%10 == 0:
+        #    cluster_histogram(cluster_dict)
+
+        centroids_nmp1 = []
+        for _, clusterObject in cluster_dict.items():
+            centroids_nmp1.append(clusterObject.centroid)
+        centroids_nmp1 = np.asarray(centroids_nmp1)
+        
+        if n >= 2:
+            for key in object_dict:
+                DoA_dict[key] = 0
+    return object_dict
+         
 
 
 def main():
