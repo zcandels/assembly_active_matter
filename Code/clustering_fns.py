@@ -182,5 +182,5 @@ def generateMolFile(clusterDataFrame):
         = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
     atom_list = [ (j,"C") for j,i in enumerate(vertices)]
     mol= tables2mol((atom_list,bonds_info))
-    fileName = f"mol_file"
+    fileName = "mol_file"
     print(Chem.MolToMolBlock(mol),file=open(fileName +".mol",'w+'))
