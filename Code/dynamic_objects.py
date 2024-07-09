@@ -4,87 +4,11 @@ import clustering_fns as clus
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
 import vic
 import visualization_module as vm
+import cluster_dyn_objs as cdo
+import networkx as nx
+    
 
 
-class cluster():
-    def __init__(self, cluster_df):
-        self.clusterDataFrame = cluster_df
-        self.numParticles = cluster_df.shape[0]
-        self.centroid = "default"
-        self.assemblyIndex = "default"
-        self.adj_mat = "default"
-
-    def computeCentroid(self):
-        
-        positions = self.clusterDataFrame[ ['x-position', 'y-position'] ]
-        x_pos, y_pos = positions.iloc[:,0], positions.iloc[:,1]
-        x_com, y_com = 0., 0.
-        for i in range(len(x_pos)):
-            # x_com += positions.iloc[i,0]
-            # y_com += positions.iloc[i,1]
-            x_com += x_pos.iloc[i]
-            y_com += y_pos.iloc[i]
-        x_com = x_com/(len(x_pos))
-        y_com = y_com/(len(x_pos))
-        
-        self.centroid = np.array([x_com, y_com])
-        return
-    
-    
-    def get_adj_mat(self):
-        adj_mat = clus.make_adj_mat(self.clusterDataFrame)
-        self.adj_mat = adj_mat
-    
-    def getAssemblyIndex(self):
-        import subprocess
-        import re
-        clus.generateMolFile(self.adj_mat)
-        
-        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
-        fName = "mol_fileOut"
-        with open(fName, 'r') as file:
-            content = file.read()
-        numbers = re.findall(r'\d+', content)
-        
-        assembly_index = int(numbers[0])
-        self.assemblyIndex = assembly_index
-
-
-class dynamic_object():
-    def __init__(self, centroidPosition,
-                 adj_mat, numParticles, assemblyIndex, area):
-        self.centroidPosition = [centroidPosition]
-        self.numParticles = [numParticles]
-        self.adj_mat = adj_mat
-        self.assemblyIndex = [assemblyIndex]
-        self.area = [area]
-        self.lifeTime = 1
-        self.DoA = "Alive"
-        # self.data_dict = {"CoM": [centroidPosition],
-        #                    "numParticles": [numParticles],
-        #                    "assemblyIndex": [assemblyIndex],
-        #                    "area": [area], "lifeTime": 1}
-    
-    def updateObject(self, centroidPosition,
-                         numParticles, assemblyIndex, area):
-        self.centroidPosition.append(centroidPosition)
-        self.numParticles.append(numParticles)
-        self.assemblyIndex.append(assemblyIndex)
-        self.area.append(area)
-        self.lifeTime += 1
-        self.DoA = "Alive"
-        #objDict = self.data_dict
-        #objDict["CoM"].append(centroidPosition)
-        #objDict["numParticles"].append(numParticles)
-        #objDict["assemblyIndex"].append(assemblyIndex)
-        #objDict["area"].append(area)
-        #objDict["lifeTime"] += 1
-        return
-    
-    def deathCertificate(self):
-        self.DoA = "Dead"
-    
-    
 def getObjectKey(object_dict, centroid, epsilon):
     for obj in object_dict:
         obj_centroid = object_dict[obj].centroidPosition[-1]
@@ -92,6 +16,26 @@ def getObjectKey(object_dict, centroid, epsilon):
             key = obj
     return key
 
+def jas(obj1, obj2):
+    import subprocess
+    import re
+    
+    graph1, graph2 = nx.Graph(obj1.adj_mat), nx.Graph(obj2.adj_mat)
+    
+    composite_graph = nx.compose(graph1, graph2)
+    comp_adj_mat = nx.adjacency_matrix(composite_graph)
+    edges, vertices = clus.adj_mat_to_edgeVert(comp_adj_mat)
+    
+    clus.generateMolFile(comp_adj_mat)
+    
+    subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    fName = "mol_fileOut"
+    with open(fName, 'r') as file:
+        content = file.read()
+    numbers = re.findall(r'\d+', content)
+    
+    assembly_index = int(numbers[0])
+    
 
 
 def do_timesteps(steps, sim_vicsek, epsilon):
@@ -115,7 +59,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
             # Change starting index of loop so we don't 
             # create a cluster object for straggler particles
             # i.e. particles for which their cluster label is -1.
-            cluster_dict[ind] = cluster(clusterList[ind])
+            cluster_dict[ind] = cdo.cluster(clusterList[ind])
             cluster_dict[ind].computeCentroid()
             cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
@@ -129,13 +73,13 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                     if d < epsilon:
                         dynObjectId += 1
                         numParticles = cluster_dict[ind].numParticles
-                        adj_mat = cluster_dict[ind].get_adj_mat()
+                        adj_mat = cluster_dict[ind].adj_mat
                         assemblyIndex = cluster_dict[ind].assemblyIndex
                         area = 1
                         # add some statement to see if the condition
                         # is satisfied for multiple clusters
                         key = dynObjectId
-                        object_dict[dynObjectId] = dynamic_object(
+                        object_dict[dynObjectId] = cdo.dynamic_object(
                             centroid, adj_mat, numParticles,
                             assemblyIndex, area)
                         DoA_dict[dynObjectId] = 1
@@ -162,6 +106,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                                                    epsilon)
                                 
                                 object_dict[dynObjectId].updateObject(centroid,
+                                                         adj_mat,
                                                          aInd, 
                                                          numParticles,
                                                          area)
@@ -176,7 +121,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                         assemblyIndex = cluster_dict[ind].assemblyIndex
                         adj_mat = cluster_dict[ind].adj_mat
                         area = 1
-                        object_dict[dynObjectId] = dynamic_object(
+                        object_dict[dynObjectId] = cdo.dynamic_object(
                             centroid, adj_mat,
                             numParticles, assemblyIndex, area)
                         DoA_dict[dynObjectId] = 1
@@ -204,21 +149,23 @@ def do_timesteps(steps, sim_vicsek, epsilon):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
+    '''
+        if(len(object_dict) > 1):
+            jas(object_dict[1], object_dict[2])
+    '''
     return object_dict
          
 
 
 def main():
     plt.close('all')
-    N = 300
+    N = 200
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 5
+    steps = 4
     
-    
-    num_clusters = np.zeros(steps, dtype=int)
     epsilon = 3*v
 
     eta = 0.1
