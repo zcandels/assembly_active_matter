@@ -159,15 +159,13 @@ def do_timesteps(steps, sim_vicsek, epsilon):
 
 def main():
     plt.close('all')
-    N = 300
+    N = 200
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 10
+    steps = 4
     
-    
-    #num_clusters = np.zeros(steps, dtype=int)
     epsilon = 3*v
 
     eta = 0.1
