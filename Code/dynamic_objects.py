@@ -12,6 +12,7 @@ class cluster():
         self.numParticles = cluster_df.shape[0]
         self.centroid = "default"
         self.assemblyIndex = "default"
+        self.adj_mat = "default"
 
     def computeCentroid(self):
         
@@ -28,12 +29,16 @@ class cluster():
         
         self.centroid = np.array([x_com, y_com])
         return
-
+    
+    
+    def get_adj_mat(self):
+        adj_mat = clus.make_adj_mat(self.clusterDataFrame)
+        self.adj_mat = adj_mat
     
     def getAssemblyIndex(self):
         import subprocess
         import re
-        clus.generateMolFile(self.clusterDataFrame)
+        clus.generateMolFile(self.adj_mat)
         
         subprocess.run(["assemblyCpp_256.exe", "mol_file"])
         fName = "mol_fileOut"
@@ -46,9 +51,11 @@ class cluster():
 
 
 class dynamic_object():
-    def __init__(self, centroidPosition, numParticles, assemblyIndex, area):
+    def __init__(self, centroidPosition,
+                 adj_mat, numParticles, assemblyIndex, area):
         self.centroidPosition = [centroidPosition]
         self.numParticles = [numParticles]
+        self.adj_mat = adj_mat
         self.assemblyIndex = [assemblyIndex]
         self.area = [area]
         self.lifeTime = 1
@@ -110,6 +117,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
             # i.e. particles for which their cluster label is -1.
             cluster_dict[ind] = cluster(clusterList[ind])
             cluster_dict[ind].computeCentroid()
+            cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
             #print(cluster_dict[ind].assemblyIndex)
             
@@ -121,13 +129,15 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                     if d < epsilon:
                         dynObjectId += 1
                         numParticles = cluster_dict[ind].numParticles
+                        adj_mat = cluster_dict[ind].get_adj_mat()
                         assemblyIndex = cluster_dict[ind].assemblyIndex
                         area = 1
                         # add some statement to see if the condition
                         # is satisfied for multiple clusters
                         key = dynObjectId
                         object_dict[dynObjectId] = dynamic_object(
-                            centroid, numParticles, assemblyIndex, area)
+                            centroid, adj_mat, numParticles,
+                            assemblyIndex, area)
                         DoA_dict[dynObjectId] = 1
             elif n > 2:
                 centroid = cluster_dict[ind].centroid
@@ -142,6 +152,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                         for _, val in object_dict.items():
                             obj_CoM = val.centroidPosition
                             if np.linalg.norm(obj_CoM - centroid) < epsilon:
+                                adj_mat = cluster_dict[ind].adj_mat
                                 aInd = cluster_dict[ind].assemblyIndex
                                 numParticles = cluster_dict[ind].numParticles
                                 area = 1. 
@@ -163,9 +174,11 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                         dynObjectId += 1 
                         numParticles = cluster_dict[ind].numParticles
                         assemblyIndex = cluster_dict[ind].assemblyIndex
+                        adj_mat = cluster_dict[ind].adj_mat
                         area = 1
                         object_dict[dynObjectId] = dynamic_object(
-                            centroid, numParticles, assemblyIndex, area)
+                            centroid, adj_mat,
+                            numParticles, assemblyIndex, area)
                         DoA_dict[dynObjectId] = 1
                         # Might not need the above line since 
                         # We only update the DoA dictionary
