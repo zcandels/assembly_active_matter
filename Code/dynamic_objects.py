@@ -17,11 +17,24 @@ def getObjectKey(object_dict, centroid, epsilon):
     return key
 
 def jas(obj1, obj2):
-    graph1, graph2 = obj1.adj_mat, obj2.adj_mat
+    import subprocess
+    import re
+    
+    graph1, graph2 = nx.Graph(obj1.adj_mat), nx.Graph(obj2.adj_mat)
     
     composite_graph = nx.compose(graph1, graph2)
+    comp_adj_mat = nx.adjacency_matrix(composite_graph)
+    edges, vertices = clus.adj_mat_to_edgeVert(comp_adj_mat)
     
-    edges, vertices = clus.adj_mat_to_edgeVert(composite_graph)
+    clus.generateMolFile(comp_adj_mat)
+    
+    subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    fName = "mol_fileOut"
+    with open(fName, 'r') as file:
+        content = file.read()
+    numbers = re.findall(r'\d+', content)
+    
+    assembly_index = int(numbers[0])
     
 
 
@@ -60,7 +73,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                     if d < epsilon:
                         dynObjectId += 1
                         numParticles = cluster_dict[ind].numParticles
-                        adj_mat = cluster_dict[ind].get_adj_mat()
+                        adj_mat = cluster_dict[ind].adj_mat
                         assemblyIndex = cluster_dict[ind].assemblyIndex
                         area = 1
                         # add some statement to see if the condition
@@ -136,12 +149,10 @@ def do_timesteps(steps, sim_vicsek, epsilon):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
-        '''     
+    '''
         if(len(object_dict) > 1):
-            return
             jas(object_dict[1], object_dict[2])
-        '''
-        
+    '''
     return object_dict
          
 
@@ -153,10 +164,10 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 5
+    steps = 10
     
     
-    num_clusters = np.zeros(steps, dtype=int)
+    #num_clusters = np.zeros(steps, dtype=int)
     epsilon = 3*v
 
     eta = 0.1
