@@ -4,6 +4,7 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
 from sklearn import preprocessing
+import networkx as nx
 
 def make_kinematic_df(pos, orientations):
     '''
@@ -115,33 +116,37 @@ def makeClustersDbscan(dfCluster):
     return clusters
 
 
+import networkx as nx
 
-def computeEdgesVertices(clusterDataFrame):
-    cluster_positions\
-        = clusterDataFrame[ ['x-position', 'y-position'] ].values
-    from sklearn.neighbors import kneighbors_graph
-    graph1 = kneighbors_graph(cluster_positions, 2, mode='connectivity',
-                          include_self=True)
+def adj_mat_to_edgeVert(clusterDataFrame):
+  """
+  Converts an adjacency matrix to a NetworkX graph and extracts vertices and edges.
 
+  Args:
+      adj_matrix: A 2D list representing the adjacency matrix of the graph.
 
-    adj_mat = graph1.toarray()
-    vertices = list(range(len(adj_mat)))
+  Returns:
+      A tuple containing two sets:
+          - vertices: A set of all vertices in the graph.
+          - edges: A set of tuples representing edges (u, v) in the graph.
+  """
+  # Create a NetworkX graph from the adjacency matrix
+  
+  cluster_positions\
+      = clusterDataFrame[ ['x-position', 'y-position'] ].values
+  from sklearn.neighbors import kneighbors_graph
+  graph_adj_mat = kneighbors_graph(cluster_positions, 2, mode='connectivity',
+                        include_self=False)
+  
+  G = nx.from_numpy_array(graph_adj_mat)
 
-    Edges = []
-    for i in range(len(adj_mat)):
-        for j in range(len(adj_mat)):
-            if i == j:
-                continue
-            if adj_mat[i,j] != 0:
-                Edges.append({i,j})
+  # Extract vertices from the graph
+  vertices = set(G.nodes())
 
-    edges = []
-    for i in range(len(Edges)):
-        if Edges[i] not in edges:
-            edges.append(Edges[i])
-        
+  # Extract edges by iterating through all edges in the graph
+  edges = set(G.edges())
 
-    return edges, vertices
+  return edges, vertices
     
 
 def generateMolFile(clusterDataFrame):
@@ -177,7 +182,7 @@ def generateMolFile(clusterDataFrame):
         mol = emol.GetMol()
         return mol
     
-    edges, vertices = computeEdgesVertices(clusterDataFrame)
+    edges, vertices = adj_mat_to_edgeVert(clusterDataFrame)
     bonds_info \
         = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
     atom_list = [ (j,"C") for j,i in enumerate(vertices)]
