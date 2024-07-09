@@ -115,10 +115,17 @@ def makeClustersDbscan(dfCluster):
 
     return clusters
 
+def make_adj_mat(clusterDataFrame):
+    cluster_positions\
+        = clusterDataFrame[ ['x-position', 'y-position'] ].values
+    from sklearn.neighbors import kneighbors_graph
+    graph_adj_mat = kneighbors_graph(cluster_positions, 2, mode='connectivity',
+                          include_self=False)
+    
+    return graph_adj_mat
+    
 
-import networkx as nx
-
-def adj_mat_to_edgeVert(clusterDataFrame):
+def adj_mat_to_edgeVert(adj_mat):
   """
   Converts an adjacency matrix to a NetworkX graph and extracts vertices and edges.
 
@@ -131,14 +138,8 @@ def adj_mat_to_edgeVert(clusterDataFrame):
           - edges: A set of tuples representing edges (u, v) in the graph.
   """
   # Create a NetworkX graph from the adjacency matrix
-  
-  cluster_positions\
-      = clusterDataFrame[ ['x-position', 'y-position'] ].values
-  from sklearn.neighbors import kneighbors_graph
-  graph_adj_mat = kneighbors_graph(cluster_positions, 2, mode='connectivity',
-                        include_self=False)
-  
-  G = nx.from_numpy_array(graph_adj_mat)
+
+  G = nx.from_numpy_array(adj_mat)
 
   # Extract vertices from the graph
   vertices = set(G.nodes())
@@ -149,7 +150,7 @@ def adj_mat_to_edgeVert(clusterDataFrame):
   return edges, vertices
     
 
-def generateMolFile(clusterDataFrame):
+def generateMolFile(adj_mat):
     from rdkit import Chem
     from rdkit import RDLogger 
     from rdkit.Chem.rdchem import RWMol
@@ -182,7 +183,7 @@ def generateMolFile(clusterDataFrame):
         mol = emol.GetMol()
         return mol
     
-    edges, vertices = adj_mat_to_edgeVert(clusterDataFrame)
+    edges, vertices = adj_mat_to_edgeVert(adj_mat)
     bonds_info \
         = [(list(bond)[0],list(bond)[1], 1.0) for j,bond in enumerate(edges)]
     atom_list = [ (j,"C") for j,i in enumerate(vertices)]
