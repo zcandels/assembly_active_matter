@@ -46,6 +46,9 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     dynObjectId = 0
     object_dict = {}
     DoA_dict = {}
+    
+    assembly_mean_var = np.zeros( (steps, 2) )
+    assembly_current_step = []
             
     centroids_nmp1 = []
     cluster_dict = {}
@@ -67,6 +70,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
             cluster_dict[ind].computeCentroid()
             cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
+            assembly_current_step.append(cluster_dict[ind].assemblyIndex)
             #print(cluster_dict[ind].assemblyIndex)
             
             if n == 2:
@@ -153,10 +157,16 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
+                
+        assembly_mean_var[n,0] = np.mean(assembly_current_step)
+        assembly_mean_var[n,1] = np.var(assembly_current_step)
+        
     '''
         if(len(object_dict) > 1):
             jas(object_dict[1], object_dict[2], OS)
     '''
+    
+    
     return object_dict
          
 
