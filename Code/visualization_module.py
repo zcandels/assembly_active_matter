@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 def visualize_clusters(cluster_dict, step):
+    
     
     import matplotlib.cm as cm
     N_clus = len(cluster_dict)
@@ -27,7 +29,10 @@ def visualize_clusters(cluster_dict, step):
         plt.title('timestep = %d' %step)
     plt.show()
     
-    figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
+    path_to_code = os.getcwd()
+    assembly_active_matter_path = os.path.dirname(path_to_code)
+    figPath = assembly_active_matter_path + "/figures/data"
+    #figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
     plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
     
     return
@@ -96,5 +101,9 @@ def mean_assembly_ind(assembly_mean_var, sim_vicsek):
     
     figPath = "C:/Users/2941737C/Research/"\
         + "assembly_active_matter/figures/data/"
+        
+    path_to_code = os.getcwd()
+    assembly_active_matter_path = os.path.dirname(path_to_code)
+    figPath = assembly_active_matter_path + "/figures/data/"
         
     plt.savefig(figPath + f"mean_assembly_eta_{eta}.png", bbox_inches='tight')

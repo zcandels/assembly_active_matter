@@ -48,8 +48,8 @@ def assign_copy_nums(object_dict, OS):
         if o1.DoA == "Alive":
             if o1.label == "default":
                 for _, o2 in object_dict.items():
-                    if o1.assemblyIndex == o2.assemblyIndex:
-                        mu = o1.assemblyIndex + 1
+                    if o1.assemblyIndex[-1] == o2.assemblyIndex[-1]:
+                        mu = o1.assemblyIndex[-1] + 1
                         if mu == jas(o1, o2, OS):
                             print("multiple objects!")
                             o1.copyNum +=1
@@ -176,7 +176,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
         assembly_mean_var[n,1] = np.std(assembly_current_step)
         
-        assign_copy_nums(object_dict, OS)
+        #assign_copy_nums(object_dict, OS)
         
         
     fName = "assembly_over_time.dat"
@@ -196,11 +196,11 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 20
+    steps = 40
     
     epsilon = 3*v
 
-    eta = [0.001, 0.01, 0.1, 1, 10]
+    eta = [0.001]
     
     OS = "win" # or "nix"
     
