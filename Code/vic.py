@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class VicsekModel:
-    def __init__(self, N_particles, L, v, eta, r, dt):
+    def __init__(self, numParticles, L, v, eta, r, dt):
         """
         Initialize the Vicsek model.
         
@@ -14,7 +14,7 @@ class VicsekModel:
         - r: Interaction radius
         - dt: Time step
         """
-        self.N_particles = N_particles
+        self.numParticles = numParticles
         self.L = L
         self.v = v
         self.eta = eta
@@ -22,8 +22,8 @@ class VicsekModel:
         self.dt = dt
         
         # Initialize positions and orientations randomly
-        self.positions = np.random.rand(N_particles, 2) * L
-        self.orientations = np.random.rand(N_particles) * 2 * np.pi
+        self.positions = np.random.rand(numParticles, 2) * L
+        self.orientations = np.random.rand(numParticles) * 2 * np.pi
         
         self.order_param = 0
     
@@ -32,11 +32,11 @@ class VicsekModel:
         Update the positions and orientations of the particles.
         """
         # Compute new orientations
-        new_orientations = np.zeros(self.N_particles)
-        vel_directions = np.zeros( (self.N_particles,2) )
+        new_orientations = np.zeros(self.numParticles)
+        vel_directions = np.zeros( (self.numParticles,2) )
         
         summ = np.array([0.,0.])
-        for i in range(self.N_particles):
+        for i in range(self.numParticles):
             # Find neighbors
             dists = np.sqrt(np.sum((self.positions - self.positions[i])**2, axis=1))
             neighbors = np.where(dists < self.r)[0]
@@ -55,7 +55,7 @@ class VicsekModel:
             summ += vel_directions[i]
 
         summ = np.linalg.norm(summ)
-        self.order_param = summ/(self.N_particles)
+        self.order_param = summ/(self.numParticles)
         
         self.orientations = new_orientations
 
@@ -113,7 +113,7 @@ class VicsekModel:
 
 # def main():
 #     # Parameters
-#     N_particles = 40        # Number of particles
+#     numParticles = 40        # Number of particles
 #     L = 3.1        # Size of the domain
 #     v = 0.03        # Speed of the particles
 #     eta = 5     # Noise amplitude
@@ -122,7 +122,7 @@ class VicsekModel:
 #     steps = 100      # Number of simulation steps
     
 #     # Initialize and run the Vicsek model
-#     sim = VicsekModel(N_particles, L, v, eta, r, dt)
+#     sim = VicsekModel(numParticles, L, v, eta, r, dt)
 #     sim.simulate(steps)
     
 #     phi = sim.get_order_param()

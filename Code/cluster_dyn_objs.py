@@ -59,10 +59,8 @@ class dynamic_object():
         self.area = [area]
         self.lifeTime = 1
         self.DoA = "Alive"
-        # self.data_dict = {"CoM": [centroidPosition],
-        #                    "numParticles": [numParticles],
-        #                    "assemblyIndex": [assemblyIndex],
-        #                    "area": [area], "lifeTime": 1}
+        self.copyNum = "1"
+        self.label = "default"
     
     def updateObject(self, centroidPosition, adj_mat,
                          numParticles, assemblyIndex, area):
@@ -73,12 +71,6 @@ class dynamic_object():
         self.adj_mat = adj_mat
         self.lifeTime += 1
         self.DoA = "Alive"
-        #objDict = self.data_dict
-        #objDict["CoM"].append(centroidPosition)
-        #objDict["numParticles"].append(numParticles)
-        #objDict["assemblyIndex"].append(assemblyIndex)
-        #objDict["area"].append(area)
-        #objDict["lifeTime"] += 1
         return
     
     def deathCertificate(self):
