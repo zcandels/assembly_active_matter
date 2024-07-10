@@ -2,12 +2,13 @@ import numpy as np
 import clustering_fns as clus
 
 class cluster():
-    def __init__(self, cluster_df):
+    def __init__(self, cluster_df, OS):
         self.clusterDataFrame = cluster_df
         self.numParticles = cluster_df.shape[0]
         self.centroid = "default"
         self.assemblyIndex = "default"
         self.adj_mat = "default"
+        self.OS = OS
 
     def computeCentroid(self):
         
@@ -35,7 +36,10 @@ class cluster():
         import re
         clus.generateMolFile(self.adj_mat)
         
-        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+        if self.OS == "win":
+            subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+        elif self.OS == "nix":
+            subprocess.run(["assemblyCpp.exe", "mol_file"])
         fName = "mol_fileOut"
         with open(fName, 'r') as file:
             content = file.read()

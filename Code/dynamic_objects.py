@@ -16,7 +16,7 @@ def getObjectKey(object_dict, centroid, epsilon):
             key = obj
     return key
 
-def jas(obj1, obj2):
+def jas(obj1, obj2, OS):
     import subprocess
     import re
     
@@ -28,17 +28,21 @@ def jas(obj1, obj2):
     
     clus.generateMolFile(comp_adj_mat)
     
-    subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    if OS == "win": 
+        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    elif OS == "nix":
+        subprocess.run(["assemblyCpp", "mol_file"])
+        
     fName = "mol_fileOut"
     with open(fName, 'r') as file:
         content = file.read()
-    numbers = re.findall(r'\d+', content)
+        numbers = re.findall(r'\d+', content)
     
     assembly_index = int(numbers[0])
     
 
 
-def do_timesteps(steps, sim_vicsek, epsilon):
+def do_timesteps(steps, sim_vicsek, epsilon, OS):
     dynObjectId = 0
     object_dict = {}
     DoA_dict = {}
@@ -59,7 +63,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
             # Change starting index of loop so we don't 
             # create a cluster object for straggler particles
             # i.e. particles for which their cluster label is -1.
-            cluster_dict[ind] = cdo.cluster(clusterList[ind])
+            cluster_dict[ind] = cdo.cluster(clusterList[ind], OS)
             cluster_dict[ind].computeCentroid()
             cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
@@ -151,7 +155,7 @@ def do_timesteps(steps, sim_vicsek, epsilon):
                 DoA_dict[key] = 0
     '''
         if(len(object_dict) > 1):
-            jas(object_dict[1], object_dict[2])
+            jas(object_dict[1], object_dict[2], OS)
     '''
     return object_dict
          
@@ -164,15 +168,17 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 4
+    steps = 10
     
     epsilon = 3*v
 
     eta = 0.1
     
+    OS = "win" # or "nix"
+    
     sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
     
-    object_dict = do_timesteps(steps, sim_vicsek, epsilon)
+    object_dict = do_timesteps(steps, sim_vicsek, epsilon, OS)
             
             
 
