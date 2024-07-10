@@ -39,7 +39,26 @@ def jas(obj1, obj2, OS):
         numbers = re.findall(r'\d+', content)
     
     assembly_index = int(numbers[0])
+    return assembly_index
     
+
+def assign_copy_nums(object_dict, OS):
+    copy_num_iter = 0
+    for _, o1  in object_dict.items():
+        if o1.DoA == "Alive":
+            if o1.label == "default":
+                for _, o2 in object_dict.items():
+                    if o1.assemblyIndex == o2.assemblyIndex:
+                        mu = o1.assemblyIndex
+                        if mu == jas(o1, o2, OS):
+                            o1.copyNum +=1
+                            o2.copyNum += 1
+                            o1.label = copy_num_iter
+                            o2.label = copy_num_iter
+                        
+            
+            
+        return
 
 
 def do_timesteps(steps, sim_vicsek, epsilon, OS):
