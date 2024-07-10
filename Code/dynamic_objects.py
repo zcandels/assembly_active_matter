@@ -49,16 +49,14 @@ def assign_copy_nums(object_dict, OS):
             if o1.label == "default":
                 for _, o2 in object_dict.items():
                     if o1.assemblyIndex == o2.assemblyIndex:
-                        mu = o1.assemblyIndex
+                        mu = o1.assemblyIndex + 1
                         if mu == jas(o1, o2, OS):
+                            print("multiple objects!")
                             o1.copyNum +=1
                             o2.copyNum += 1
                             o1.label = copy_num_iter
                             o2.label = copy_num_iter
                         
-            
-            
-        return
 
 
 def do_timesteps(steps, sim_vicsek, epsilon, OS):
@@ -162,11 +160,6 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
                 for dynObjectId, DoA in DoA_dict.items():
                     if DoA == 0:
                         object_dict[dynObjectId].deathCertificate()
-        
-        
-        #vm.visualize_clusters(clusters, n)
-        if n%10 == 0:
-            vm.cluster_histogram(cluster_dict)
 
         centroids_nmp1 = []
         for _, clusterObject in cluster_dict.items():
@@ -177,17 +170,20 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
             for key in object_dict:
                 DoA_dict[key] = 0
                 
+            #vm.object_histogram(object_dict)
+            vm.visualize_clusters(cluster_dict, n)
+                
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
-        assembly_mean_var[n,1] = np.var(assembly_current_step)
+        assembly_mean_var[n,1] = np.std(assembly_current_step)
+        
         
     fName = "assembly_over_time.dat"
     np.savetxt(fName, assembly_mean_var)
-        
-    if(len(object_dict) > 1):
-        jas(object_dict[1], object_dict[2], OS)
+    
+    vm.mean_assembly_ind(assembly_mean_var, sim_vicsek)
     
     
-    return object_dict
+    return
          
 
 
@@ -201,7 +197,7 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 5
+    steps = 10
     
     epsilon = 3*v
 
