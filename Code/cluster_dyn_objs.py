@@ -39,7 +39,7 @@ class cluster():
         if self.OS == "win":
             subprocess.run(["assemblyCpp_256.exe", "mol_file"])
         elif self.OS == "nix":
-            subprocess.run(["assemblyCpp.exe", "mol_file"])
+            subprocess.run(["assemblyCpp", "mol_file"])
         fName = "mol_fileOut"
         with open(fName, 'r') as file:
             content = file.read()
