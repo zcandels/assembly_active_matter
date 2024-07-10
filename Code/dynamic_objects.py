@@ -16,7 +16,7 @@ def getObjectKey(object_dict, centroid, epsilon):
             key = obj
     return key
 
-def jas(obj1, obj2):
+def jas(obj1, obj2, OS):
     import subprocess
     import re
     
@@ -28,20 +28,27 @@ def jas(obj1, obj2):
     
     clus.generateMolFile(comp_adj_mat)
     
-    subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    if OS == "win": 
+        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+    elif OS == "nix":
+        subprocess.run(["assemblyCpp", "mol_file"])
+        
     fName = "mol_fileOut"
     with open(fName, 'r') as file:
         content = file.read()
-    numbers = re.findall(r'\d+', content)
+        numbers = re.findall(r'\d+', content)
     
     assembly_index = int(numbers[0])
     
 
 
-def do_timesteps(steps, sim_vicsek, epsilon):
+def do_timesteps(steps, sim_vicsek, epsilon, OS):
     dynObjectId = 0
     object_dict = {}
     DoA_dict = {}
+    
+    assembly_mean_var = np.zeros( (steps, 2) )
+    assembly_current_step = []
             
     centroids_nmp1 = []
     cluster_dict = {}
@@ -59,10 +66,11 @@ def do_timesteps(steps, sim_vicsek, epsilon):
             # Change starting index of loop so we don't 
             # create a cluster object for straggler particles
             # i.e. particles for which their cluster label is -1.
-            cluster_dict[ind] = cdo.cluster(clusterList[ind])
+            cluster_dict[ind] = cdo.cluster(clusterList[ind], OS)
             cluster_dict[ind].computeCentroid()
             cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
+            assembly_current_step.append(cluster_dict[ind].assemblyIndex)
             #print(cluster_dict[ind].assemblyIndex)
             
             if n == 2:
@@ -149,30 +157,41 @@ def do_timesteps(steps, sim_vicsek, epsilon):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
+                
+        assembly_mean_var[n,0] = np.mean(assembly_current_step)
+        assembly_mean_var[n,1] = np.var(assembly_current_step)
+        
+    fName = "assembly_over_time.dat"
+    np.savetxt(fName, assembly_mean_var)
+        
     '''
         if(len(object_dict) > 1):
-            jas(object_dict[1], object_dict[2])
+            jas(object_dict[1], object_dict[2], OS)
     '''
+    
+    
     return object_dict
          
 
 
 def main():
     plt.close('all')
-    N = 200
+    N = 300
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 4
+    steps = 100
     
     epsilon = 3*v
 
     eta = 0.1
     
+    OS = "win" # or "nix"
+    
     sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
     
-    object_dict = do_timesteps(steps, sim_vicsek, epsilon)
+    object_dict = do_timesteps(steps, sim_vicsek, epsilon, OS)
             
             
 
