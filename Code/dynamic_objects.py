@@ -171,7 +171,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
                 DoA_dict[key] = 0
                 
             #vm.object_histogram(object_dict)
-            vm.visualize_clusters(cluster_dict, n)
+            #vm.visualize_clusters(cluster_dict, n)
                 
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
         assembly_mean_var[n,1] = np.std(assembly_current_step)
@@ -180,10 +180,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     fName = "assembly_over_time.dat"
     np.savetxt(fName, assembly_mean_var)
     
-    vm.mean_assembly_ind(assembly_mean_var, sim_vicsek)
-    
-    
-    return
+    return assembly_mean_var
          
 
 
@@ -197,17 +194,20 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 10
+    steps = 20
     
     epsilon = 3*v
 
-    eta = 0.1
+    eta = [0.001, 0.01, 0.1, 1, 10]
     
     OS = "win" # or "nix"
     
-    sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
+    for ii in range(len(eta)):
+        sim_vicsek = vic.VicsekModel(N, L, v, eta[ii], r, dt)
     
-    object_dict = do_timesteps(steps, sim_vicsek, epsilon, OS)
+        assembly_mean_var = do_timesteps(steps, sim_vicsek, epsilon, OS)
+    
+        vm.mean_assembly_ind(assembly_mean_var, sim_vicsek)
     
     toc = time.time()
     

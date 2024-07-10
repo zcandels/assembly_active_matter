@@ -88,8 +88,13 @@ def mean_assembly_ind(assembly_mean_var, sim_vicsek):
     #                alpha=0.2, label='std dev')
     ax.set_xlabel(r"time $t$", fontsize=20)
     ax.set_ylabel(r"$\bar{a}$",fontsize=20)
-    ax.annotate(r'$\eta = %g$' %eta, xy=(0.95, 0.7), xycoords='axes fraction',
+    ax.annotate(r'$\eta = %g$' %eta, xy=(0.95, 0.5), xycoords='axes fraction',
             fontsize=20, ha='right', va='top')
-    ax.annotate(r'$\rho = %g$' %rho, xy=(0.95, 0.62), xycoords='axes fraction',
+    ax.annotate(r'$\rho = %g$' %rho, xy=(0.95, 0.42), xycoords='axes fraction',
             fontsize=20, ha='right', va='top')
     ax.tick_params(direction='in')
+    
+    figPath = "C:/Users/2941737C/Research/"\
+        + "assembly_active_matter/figures/data/"
+        
+    plt.savefig(figPath + f"mean_assembly_eta_{eta}.png", bbox_inches='tight')
