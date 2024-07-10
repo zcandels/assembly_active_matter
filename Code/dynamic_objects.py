@@ -161,6 +161,9 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
         assembly_mean_var[n,1] = np.var(assembly_current_step)
         
+    fName = "assembly_over_time.dat"
+    np.savetxt(fName, assembly_mean_var)
+        
     '''
         if(len(object_dict) > 1):
             jas(object_dict[1], object_dict[2], OS)
@@ -173,12 +176,12 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
 
 def main():
     plt.close('all')
-    N = 200
+    N = 300
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 10
+    steps = 100
     
     epsilon = 3*v
 
