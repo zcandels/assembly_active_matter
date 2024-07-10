@@ -176,6 +176,8 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
         assembly_mean_var[n,1] = np.std(assembly_current_step)
         
+        assign_copy_nums(object_dict, OS)
+        
         
     fName = "assembly_over_time.dat"
     np.savetxt(fName, assembly_mean_var)
