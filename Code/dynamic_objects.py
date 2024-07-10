@@ -164,10 +164,8 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     fName = "assembly_over_time.dat"
     np.savetxt(fName, assembly_mean_var)
         
-    '''
-        if(len(object_dict) > 1):
-            jas(object_dict[1], object_dict[2], OS)
-    '''
+    if(len(object_dict) > 1):
+        jas(object_dict[1], object_dict[2], OS)
     
     
     return object_dict
@@ -175,13 +173,16 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
 
 
 def main():
+    import time
+    
+    tic = time.time()
     plt.close('all')
     N = 300
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 100
+    steps = 5
     
     epsilon = 3*v
 
@@ -192,6 +193,10 @@ def main():
     sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
     
     object_dict = do_timesteps(steps, sim_vicsek, epsilon, OS)
+    
+    toc = time.time()
+    
+    print(toc - tic)
             
             
 
