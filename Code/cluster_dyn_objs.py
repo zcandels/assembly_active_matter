@@ -1,5 +1,6 @@
 import numpy as np
 import clustering_fns as clus
+import os
 
 class cluster():
     def __init__(self, cluster_df, OS):
@@ -34,12 +35,19 @@ class cluster():
     def getAssemblyIndex(self):
         import subprocess
         import re
+        
         clus.generateMolFile(self.adj_mat)
         
+        pwd = os.getcwd()
+        
         if self.OS == "win":
-            subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+            exe_path = pwd + "/assemblyCpp_256.exe"
+            subprocess.run([exe_path, "mol_file"],
+                           stdout = subprocess.DEVNULL)
         elif self.OS == "nix":
-            subprocess.run(["assemblyCpp", "mol_file"])
+            exe_path = pwd + "assemblyCpp"
+            subprocess.run([exe_path, "mol_file"],
+                           stdout = subprocess.DEVNULL)
         fName = "mol_fileOut"
         with open(fName, 'r') as file:
             content = file.read()
@@ -59,7 +67,7 @@ class dynamic_object():
         self.area = [area]
         self.lifeTime = 1
         self.DoA = "Alive"
-        self.copyNum = "1"
+        self.copyNum = 1
         self.label = "default"
     
     def updateObject(self, centroidPosition, adj_mat,

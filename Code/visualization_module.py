@@ -32,7 +32,6 @@ def visualize_clusters(cluster_dict, step):
     path_to_code = os.getcwd()
     assembly_active_matter_path = os.path.dirname(path_to_code)
     figPath = assembly_active_matter_path + "/figures/data"
-    #figPath = "C:/Users/2941737C/Research/assembly_active_matter/figures/data/"
     plt.savefig(figPath + f"step{step}.png", bbox_inches='tight')
     
     return
@@ -93,9 +92,9 @@ def mean_assembly_ind(assembly_mean_var, sim_vicsek):
     #                alpha=0.2, label='std dev')
     ax.set_xlabel(r"time $t$", fontsize=20)
     ax.set_ylabel(r"$\bar{a}$",fontsize=20)
-    ax.annotate(r'$\eta = %g$' %eta, xy=(0.95, 0.5), xycoords='axes fraction',
+    ax.annotate(r'$\eta = %e$' %eta, xy=(0.95, 0.7), xycoords='axes fraction',
             fontsize=20, ha='right', va='top')
-    ax.annotate(r'$\rho = %g$' %rho, xy=(0.95, 0.42), xycoords='axes fraction',
+    ax.annotate(r'$\rho = %g$' %rho, xy=(0.95, 0.62), xycoords='axes fraction',
             fontsize=20, ha='right', va='top')
     ax.tick_params(direction='in')
     

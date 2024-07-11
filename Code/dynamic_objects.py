@@ -200,7 +200,7 @@ def main():
     
     epsilon = 3*v
 
-    eta = [0.001]
+    eta = [0.01]
     
     OS = "win" # or "nix"
     
