@@ -45,7 +45,7 @@ class cluster():
             subprocess.run([exe_path, "mol_file"],
                            stdout = subprocess.DEVNULL)
         elif self.OS == "nix":
-            exe_path = pwd + "assemblyCpp"
+            exe_path = pwd + "/assemblyCpp"
             subprocess.run([exe_path, "mol_file"],
                            stdout = subprocess.DEVNULL)
         fName = "mol_fileOut"
