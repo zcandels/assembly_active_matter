@@ -65,9 +65,7 @@ def assign_copy_nums(object_dict, OS):
                             o2.label = unique_obj_iter
                             
 
-def computeFullAssembly(object_dict, fullAssembly):
-    zero_indices = np.where(fullAssembly == 0)[0]
-    ind = np.min(zero_indices)
+def computeFullAssembly(object_dict, fullAssembly, step):
     accounted_for = []
     for _, obj in object_dict.items():
         label = obj.label
@@ -76,8 +74,8 @@ def computeFullAssembly(object_dict, fullAssembly):
         accounted_for.append(label)
         assInd = obj.assemblyIndex[-1]
         copyNum = obj.copyNum
-        fullAssembly[ind] += np.exp(assInd)*(copyNum - 1)
-    fullAssembly[ind] /= len(object_dict)
+        fullAssembly[step] += np.exp(assInd)*(copyNum - 1)
+    fullAssembly[step] /= len(object_dict)
         
         
                         
@@ -199,7 +197,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
                 vm.object_histogram(object_dict, sim_vicsek)
                 
             assign_copy_nums(object_dict, OS)
-            computeFullAssembly(object_dict, fullAssembly)
+            computeFullAssembly(object_dict, fullAssembly, n)
             #vm.visualize_clusters(cluster_dict, n)
                 
         assemblyIndices_mean_std[n,0] = np.mean(assembly_indices_current_step)
@@ -223,18 +221,18 @@ def main():
     
     tic = time.time()
     plt.close('all')
-    N = 150
+    N = 300
     L = 3.1
     v = 0.03
     r = 1
     dt = 1
-    steps = 5
+    steps = 30
     
     epsilon = 3*v
 
     eta = [0.1]
     
-    OS = "win" # or "nix"
+    OS = "nix"
     
     for ii in range(len(eta)):
         sim_vicsek = vic.VicsekModel(N, L, v, eta[ii], r, dt)

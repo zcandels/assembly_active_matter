@@ -1,0 +1,25 @@
+{
+"file_graph":[
+{
+"Vertices": [0,1,2,3,4,5,6,7,8,9,10,11,12],
+"Edges": [[0,1],[0,7],[0,10],[0,11],[1,10],[2,3],[2,9],[3,8],[4,9],[4,5],[5,9],[6,12],[6,8],[7,12],[11,12]],
+"VertexColours": ["C","C","C","C","C","C","C","C","C","C","C","C","C"],
+"EdgeColours": ["single","single","single","single","single","single","single","single","single","single","single","single","single","single","single"]
+}
+],
+"remnant":[
+{
+"Vertices": [0,1,7,10],
+"Edges": [[0,1],[0,7],[1,10]],
+"VertexColours": ["C","C","C","C"],
+"EdgeColours": ["single","single","single"]
+}
+],
+"duplicates":[
+{"Left":[[0,1],[0,10],[0,11],[1,10],[7,12],[11,12]],"Right":[[2,3],[2,9],[3,8],[4,9],[4,5],[5,9]]},
+{"Left":[[7,12],[11,12]],"Right":[[6,12],[6,8]]},
+{"Left":[[0,1],[1,10]],"Right":[[0,10],[0,11]]},
+{"Left":[[0,1],[1,10]],"Right":[[7,12],[11,12]]}
+],
+"removed_edges":[]
+}
