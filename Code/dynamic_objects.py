@@ -71,10 +71,10 @@ def computeFullAssembly(object_dict, fullAssembly):
     accounted_for = []
     for _, obj in object_dict.items():
         label = obj.label
-        if label in accounted_for:
+        if label != "default" and label in accounted_for:
             continue
         accounted_for.append(label)
-        assInd = obj.assemblyIndex
+        assInd = obj.assemblyIndex[-1]
         copyNum = obj.copyNum
         fullAssembly[ind] += np.exp(assInd)*(copyNum - 1)
     fullAssembly[ind] /= len(object_dict)
@@ -88,7 +88,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     object_dict = {}
     DoA_dict = {}
     
-    assembly_mean_var = np.zeros( (steps, 2) )
+    assemblyIndices_mean_std = np.zeros( (steps, 2) )
     assembly_indices_current_step = []
     
     fullAssembly = np.zeros(steps)
@@ -202,16 +202,19 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
             computeFullAssembly(object_dict, fullAssembly)
             #vm.visualize_clusters(cluster_dict, n)
                 
-        assembly_mean_var[n,0] = np.mean(assembly_indices_current_step)
-        assembly_mean_var[n,1] = np.std(assembly_indices_current_step)
+        assemblyIndices_mean_std[n,0] = np.mean(assembly_indices_current_step)
+        assemblyIndices_mean_std[n,1] = np.std(assembly_indices_current_step)
         
 
         
         
-    fName = "assembly_over_time.dat"
-    np.savetxt(fName, assembly_mean_var)
+    fName = "meanStdAssemblyIndexOverTime.dat"
+    np.savetxt(fName, assemblyIndices_mean_std)
     
-    return assembly_mean_var
+    f2Name = "fullAssemblyOverTime.dat"
+    np.savetxt(f2Name, fullAssembly)
+    
+    return assemblyIndices_mean_std, fullAssembly
          
 
 
@@ -220,7 +223,7 @@ def main():
     
     tic = time.time()
     plt.close('all')
-    N = 300
+    N = 150
     L = 3.1
     v = 0.03
     r = 1
@@ -229,16 +232,18 @@ def main():
     
     epsilon = 3*v
 
-    eta = [0.01]
+    eta = [0.1]
     
     OS = "win" # or "nix"
     
     for ii in range(len(eta)):
         sim_vicsek = vic.VicsekModel(N, L, v, eta[ii], r, dt)
     
-        assembly_mean_var = do_timesteps(steps, sim_vicsek, epsilon, OS)
+        assemblyIndices_mean_std, fullAssembly\
+            = do_timesteps(steps, sim_vicsek, epsilon, OS)
     
-        vm.mean_assembly_ind(assembly_mean_var, sim_vicsek)
+        vm.mean_assembly_ind(assemblyIndices_mean_std, sim_vicsek)
+        vm.full_assembly(fullAssembly, sim_vicsek)
     
     toc = time.time()
     
