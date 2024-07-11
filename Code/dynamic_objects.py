@@ -6,6 +6,7 @@ import vic
 import visualization_module as vm
 import cluster_dyn_objs as cdo
 import networkx as nx
+import os
     
 
 
@@ -28,10 +29,16 @@ def jas(obj1, obj2, OS):
     
     clus.generateMolFile(comp_adj_mat)
     
+    pwd = os.getcwd()
+    
     if OS == "win": 
-        subprocess.run(["assemblyCpp_256.exe", "mol_file"])
+        exe_path = pwd + "/assemblyCpp_256.exe"
+        subprocess.run([exe_path, "mol_file"],
+                          stdout = subprocess.DEVNULL)
     elif OS == "nix":
-        subprocess.run(["assemblyCpp", "mol_file"])
+        exe_path = pwd + "/assemblyCpp"
+        subprocess.run([exe_path, "mol_file"],
+                          stdout = subprocess.DEVNULL)
         
     fName = "mol_fileOut"
     with open(fName, 'r') as file:
