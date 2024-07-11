@@ -56,6 +56,23 @@ def assign_copy_nums(object_dict, OS):
                             o2.copyNum += 1
                             o1.label = unique_obj_iter
                             o2.label = unique_obj_iter
+                            
+
+def computeFullAssembly(object_dict, fullAssembly):
+    zero_indices = np.where(fullAssembly == 0)[0]
+    ind = np.min(zero_indices)
+    accounted_for = []
+    for _, obj in object_dict.items():
+        label = obj.label
+        if label in accounted_for:
+            continue
+        accounted_for.append(label)
+        assInd = obj.assemblyIndex
+        copyNum = obj.copyNum
+        fullAssembly[ind] += np.exp(assInd)*(copyNum - 1)
+    fullAssembly[ind] /= len(object_dict)
+        
+        
                         
 
 
@@ -65,7 +82,9 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     DoA_dict = {}
     
     assembly_mean_var = np.zeros( (steps, 2) )
-    assembly_current_step = []
+    assembly_indices_current_step = []
+    
+    fullAssembly = np.zeros(steps)
             
     centroids_nmp1 = []
     cluster_dict = {}
@@ -87,7 +106,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
             cluster_dict[ind].computeCentroid()
             cluster_dict[ind].get_adj_mat()
             cluster_dict[ind].getAssemblyIndex()
-            assembly_current_step.append(cluster_dict[ind].assemblyIndex)
+            assembly_indices_current_step.append(cluster_dict[ind].assemblyIndex)
             #print(cluster_dict[ind].assemblyIndex)
             
             if n == 2:
@@ -171,12 +190,15 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
                 DoA_dict[key] = 0
             if n%5 == 0:  
                 vm.object_histogram(object_dict, sim_vicsek)
+                
+            assign_copy_nums(object_dict, OS)
+            computeFullAssembly(object_dict, fullAssembly)
             #vm.visualize_clusters(cluster_dict, n)
                 
-        assembly_mean_var[n,0] = np.mean(assembly_current_step)
-        assembly_mean_var[n,1] = np.std(assembly_current_step)
+        assembly_mean_var[n,0] = np.mean(assembly_indices_current_step)
+        assembly_mean_var[n,1] = np.std(assembly_indices_current_step)
         
-        #assign_copy_nums(object_dict, OS)
+
         
         
     fName = "assembly_over_time.dat"
