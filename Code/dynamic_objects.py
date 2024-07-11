@@ -43,7 +43,7 @@ def jas(obj1, obj2, OS):
     
 
 def assign_copy_nums(object_dict, OS):
-    copy_num_iter = 0
+    unique_obj_iter = 0
     for _, o1  in object_dict.items():
         if o1.DoA == "Alive":
             if o1.label == "default":
@@ -52,10 +52,10 @@ def assign_copy_nums(object_dict, OS):
                         mu = o1.assemblyIndex[-1] + 1
                         if mu == jas(o1, o2, OS):
                             print("multiple objects!")
-                            o1.copyNum +=1
+                            o1.copyNum += 1
                             o2.copyNum += 1
-                            o1.label = copy_num_iter
-                            o2.label = copy_num_iter
+                            o1.label = unique_obj_iter
+                            o2.label = unique_obj_iter
                         
 
 
@@ -169,8 +169,8 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
-                
-            #vm.object_histogram(object_dict)
+            if n%5 == 0:  
+                vm.object_histogram(object_dict, sim_vicsek)
             #vm.visualize_clusters(cluster_dict, n)
                 
         assembly_mean_var[n,0] = np.mean(assembly_current_step)
@@ -196,7 +196,7 @@ def main():
     v = 0.03
     r = 1
     dt = 1
-    steps = 40
+    steps = 5
     
     epsilon = 3*v
 
