@@ -193,11 +193,11 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         if n >= 2:
             for key in object_dict:
                 DoA_dict[key] = 0
-            if n%5 == 0:  
+            if n%10 == 0:  
                 vm.object_histogram(object_dict, sim_vicsek)
                 
-            assign_copy_nums(object_dict, OS)
-            computeFullAssembly(object_dict, fullAssembly, n)
+#            assign_copy_nums(object_dict, OS)
+#            computeFullAssembly(object_dict, fullAssembly, n)
             #vm.visualize_clusters(cluster_dict, n)
                 
         assemblyIndices_mean_std[n,0] = np.mean(assembly_indices_current_step)
@@ -221,18 +221,19 @@ def main():
     
     tic = time.time()
     plt.close('all')
-    N = 300
-    L = 3.1
+    rho = 97
+    L = 10
+    N = rho*L**2
     v = 0.03
     r = 1
     dt = 1
-    steps = 30
+    steps = 20
     
     epsilon = 3*v
 
-    eta = [0.1]
+    eta = [0.001]
     
-    OS = "nix"
+    OS = "win"
     
     for ii in range(len(eta)):
         sim_vicsek = vic.VicsekModel(N, L, v, eta[ii], r, dt)
@@ -240,8 +241,8 @@ def main():
         assemblyIndices_mean_std, fullAssembly\
             = do_timesteps(steps, sim_vicsek, epsilon, OS)
     
-        vm.mean_assembly_ind(assemblyIndices_mean_std, sim_vicsek)
-        vm.full_assembly(fullAssembly, sim_vicsek)
+        #vm.mean_assembly_ind(assemblyIndices_mean_std, sim_vicsek)
+        #vm.full_assembly(fullAssembly, sim_vicsek)
     
     toc = time.time()
     
