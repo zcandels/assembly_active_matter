@@ -200,8 +200,8 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
             computeFullAssembly(object_dict, fullAssembly, n)
             #vm.visualize_clusters(cluster_dict, n)
                 
-        #assemblyIndices_mean_std[n,0] = np.mean(assembly_indices_current_step)
-        #assemblyIndices_mean_std[n,1] = np.std(assembly_indices_current_step)
+        assemblyIndices_mean_std[n,0] = np.mean(assembly_indices_current_step)
+        assemblyIndices_mean_std[n,1] = np.std(assembly_indices_current_step)
         
 
         
@@ -216,12 +216,12 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
          
 
 
-def main(rho, eta):
+def main():
     import time
     
     tic = time.time()
     plt.close('all')
-    #rho = float(sys.argv[1]) #97
+    rho = 45
     L = 3
     N = round(rho*L**2)
     v = 0.03
@@ -231,7 +231,7 @@ def main(rho, eta):
     
     epsilon = 3*v
 
-    #eta = float(sys.argv[1]) # 0.001
+    eta = 0.1
     
     OS = "win"
     sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
@@ -248,7 +248,5 @@ def main(rho, eta):
             
 
 if __name__ == '__main__':
-    rho = float(sys.argv[1])
-    eta = float(sys.argv[2])
-    main(rho, eta)
+    main()
 
