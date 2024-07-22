@@ -7,7 +7,7 @@ import visualization_module as vm
 import cluster_dyn_objs as cdo
 import networkx as nx
 import os
-    
+import sys    
 
 
 def getObjectKey(object_dict, centroid, epsilon):
@@ -216,29 +216,26 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
          
 
 
-def main():
+def main(rho, eta):
     import time
     
     tic = time.time()
     plt.close('all')
-    rho = 97
+    #rho = float(sys.argv[1]) #97
     L = 10
-    N = rho*L**2
+    N = round(rho*L**2)
     v = 0.03
     r = 1
     dt = 1
-    steps = 20
+    steps = 4
     
     epsilon = 3*v
 
-    eta = [0.001]
+    #eta = float(sys.argv[1]) # 0.001
     
-    OS = "win"
-    
-    for ii in range(len(eta)):
-        sim_vicsek = vic.VicsekModel(N, L, v, eta[ii], r, dt)
-    
-        assemblyIndices_mean_std, fullAssembly\
+    OS = "nix"
+    sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)
+    assemblyIndices_mean_std, fullAssembly\
             = do_timesteps(steps, sim_vicsek, epsilon, OS)
     
         #vm.mean_assembly_ind(assemblyIndices_mean_std, sim_vicsek)
@@ -251,5 +248,7 @@ def main():
             
 
 if __name__ == '__main__':
-    main()
+    rho = float(sys.argv[1])
+    eta = float(sys.argv[2])
+    main(rho, eta)
 
