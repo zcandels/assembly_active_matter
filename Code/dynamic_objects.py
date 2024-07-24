@@ -213,8 +213,8 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
         
     #fName = "meanStdAssemblyIndexOverTime.dat"
     #np.savetxt(fName, assemblyIndices_mean_std)
-    
-    f2Name = f"fullAssemblyEta_{eta}_rho_{rho}.dat"
+    pwd = os.getcwd()
+    f2Name = f"{pwd}/data/fullAssemblyEta_{eta}_rho_{rho}.dat"
     np.savetxt(f2Name, fullAssembly)
     
     return assemblyIndices_mean_std, fullAssembly
