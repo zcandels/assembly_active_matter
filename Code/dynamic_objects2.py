@@ -221,17 +221,17 @@ def main():
     
     tic = time.time()
     plt.close('all')
-    rho = 45
+    rho = 40
     L = 3
     N = round(rho*L**2)
     v = 0.03
     r = 1
     dt = 1
-    steps = 2
+    steps = 20
     
     epsilon = 3*v
 
-    eta = 0.1
+    eta = 0.01
     
     OS = "win"
     sim_vicsek = vic.VicsekModel(N, L, v, eta, r, dt)

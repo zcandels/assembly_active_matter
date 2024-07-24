@@ -86,6 +86,11 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     object_dict = {}
     DoA_dict = {}
     
+    eta = sim_vicsek.eta
+    N = sim_vicsek.numParticles
+    L = sim_vicsek.L
+    rho = N/L**2
+    
     assemblyIndices_mean_std = np.zeros( (steps, 2) )
     assembly_indices_current_step = []
     
@@ -209,7 +214,7 @@ def do_timesteps(steps, sim_vicsek, epsilon, OS):
     #fName = "meanStdAssemblyIndexOverTime.dat"
     #np.savetxt(fName, assemblyIndices_mean_std)
     
-    f2Name = "fullAssemblyOverTime.dat"
+    f2Name = f"fullAssemblyEta_{eta}_rho_{rho}.dat"
     np.savetxt(f2Name, fullAssembly)
     
     return assemblyIndices_mean_std, fullAssembly
